@@ -4,7 +4,7 @@
 #include "GameFramework/PlayerController.h"
 #include "Inv_PlayerController.generated.h"
 
-class UHUDWidget;
+class UInv_HUDWidget;
 class UInputMappingContext;
 class UInputAction;
 
@@ -37,10 +37,10 @@ private:
 	TObjectPtr<UInputAction> PrimaryInteractAction;
 	
 	UPROPERTY(EditDefaultsOnly, Category = "Inventory")
-	TSubclassOf<UHUDWidget> HUDWidgetClass;
+	TSubclassOf<UInv_HUDWidget> HUDWidgetClass;
 	
 	UPROPERTY()
-	TObjectPtr<UHUDWidget> HUDWidget;
+	TObjectPtr<UInv_HUDWidget> HUDWidget;
 	
 	
 	
