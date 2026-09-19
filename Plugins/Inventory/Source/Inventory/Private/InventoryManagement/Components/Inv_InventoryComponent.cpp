@@ -1,0 +1,79 @@
+#include "InventoryManagement/Components/Inv_InventoryComponent.h"
+#include "Widgets/Inventory/InventoryBase/Inv_InventoryBase.h"
+
+
+UInv_InventoryComponent::UInv_InventoryComponent()
+{
+	PrimaryComponentTick.bCanEverTick = false;
+	
+	bInventoryMenuOpen = false;
+}
+
+void UInv_InventoryComponent::ToggleInventoryMenu()
+{
+	if (bInventoryMenuOpen)
+	{
+		CloseInventoryMenu();
+	}
+	else
+	{
+		OpenInventoryMenu();
+	}
+}
+
+
+void UInv_InventoryComponent::BeginPlay()
+{
+	Super::BeginPlay();
+
+	ConstructInventory();	//Create InventoryMenu Widget
+}
+
+void UInv_InventoryComponent::ConstructInventory()
+{
+	OwningController = Cast<APlayerController>(GetOwner());
+	checkf(OwningController.IsValid(), TEXT("请确保Inv_InventoryComponent是挂载在PlayerController身上的！"));
+	
+	if (!OwningController->IsLocalController()) return;
+	
+	InventoryMenu = CreateWidget<UInv_InventoryBase>(OwningController.Get(), InventoryMenuClass);
+	if (IsValid(InventoryMenu))
+	{
+		InventoryMenu->AddToViewport();
+		CloseInventoryMenu();
+	}
+}
+
+
+void UInv_InventoryComponent::OpenInventoryMenu()
+{
+	if (!IsValid(InventoryMenu)) return;
+	InventoryMenu->SetVisibility(ESlateVisibility::Visible);
+	
+	bInventoryMenuOpen = true;
+	
+	if (!OwningController.IsValid()) return;
+	
+	FInputModeGameAndUI InputMode;
+	OwningController->SetInputMode(InputMode);
+	OwningController->SetShowMouseCursor(true);
+}
+
+
+void UInv_InventoryComponent::CloseInventoryMenu()
+{
+	if (!IsValid(InventoryMenu)) return;
+	InventoryMenu->SetVisibility(ESlateVisibility::Collapsed);
+	
+	bInventoryMenuOpen = false;
+	
+	if (!OwningController.IsValid()) return;
+	
+	FInputModeGameOnly InputMode;
+	OwningController->SetInputMode(InputMode);
+	OwningController->SetShowMouseCursor(false);
+}
+
+
+
+
