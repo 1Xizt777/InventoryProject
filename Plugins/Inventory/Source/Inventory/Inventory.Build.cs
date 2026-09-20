@@ -26,6 +26,8 @@ public class Inventory : ModuleRules
 			new string[]
 			{
 				"Core",
+				"NetCore",
+				"CoreUObject"
 				// ... add other public dependencies that you statically link with here ...
 			}
 			);

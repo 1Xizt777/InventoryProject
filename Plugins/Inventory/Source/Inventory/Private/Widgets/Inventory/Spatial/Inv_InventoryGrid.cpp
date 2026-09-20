@@ -21,20 +21,20 @@ void UInv_InventoryGrid::ConstructGrid()
 	GridSlots.Reserve(Rows * Columns);
 	
 	
-	for (int32 j = 0 ; j < Rows; ++j)
+	for (int32 Row = 0 ; Row < Rows; ++Row)	//行
 	{
-		for (int32 i = 0; i < Columns; ++i)
+		for (int32 Column = 0; Column < Columns; ++Column)	//列
 		{
 			UInv_GridSlot* GridSlot = CreateWidget<UInv_GridSlot>(this, GridSlotClass);
-			CanvasPanel->AddChild(GridSlot);
+			CanvasPanel->AddChild(GridSlot);		//引擎建好 WidgetSlot 并绑定
 			
-			const FIntPoint TilePosition(i,j);
+			const FIntPoint TilePosition(Column,Row);
 			GridSlot->SetTileIndex(UInv_WidgetUtils::GetIndexFromPosition(TilePosition, Columns));
 			
 			UCanvasPanelSlot* GridCPS = UWidgetLayoutLibrary::SlotAsCanvasSlot(GridSlot);
 			GridCPS->SetSize(FVector2D(TileSize));
-			GridCPS->SetPosition(TilePosition*TileSize);
-			
+			GridCPS->SetPosition(TilePosition*TileSize);	//  (0,1)*54 = (0,54)  
+															//  (1,2)*54 = (54,108)
 			GridSlots.Add(GridSlot);
 		}
 	}

@@ -1,4 +1,6 @@
 #include "InventoryManagement/Components/Inv_InventoryComponent.h"
+
+#include "Net/UnrealNetwork.h"
 #include "Widgets/Inventory/InventoryBase/Inv_InventoryBase.h"
 
 
@@ -6,7 +8,18 @@ UInv_InventoryComponent::UInv_InventoryComponent()
 {
 	PrimaryComponentTick.bCanEverTick = false;
 	
+	SetIsReplicatedByDefault(true);
+	bReplicateUsingRegisteredSubObjectList = true;
+	
+	
 	bInventoryMenuOpen = false;
+}
+
+void UInv_InventoryComponent::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	
+	DOREPLIFETIME(ThisClass,InventoryList);
 }
 
 void UInv_InventoryComponent::ToggleInventoryMenu()
@@ -21,6 +34,45 @@ void UInv_InventoryComponent::ToggleInventoryMenu()
 	}
 }
 
+
+void UInv_InventoryComponent::TryAddItem(UInv_ItemComponent* ItemComponent)
+{
+	FInv_SlotAvailabilityResult Result = InventoryMenu->HasRoomForItem(ItemComponent);
+	
+	if (Result.TotalRoomToFill == 0)
+	{
+		NoRoomInInventory.Broadcast();		//背包没有空间
+		return;
+	}
+	
+	if (Result.Item.IsValid() && Result.bStackable)
+	{
+		Server_AddStackToItem(ItemComponent , Result.TotalRoomToFill , Result.Remainder);
+	}
+	else if (Result.TotalRoomToFill > 0)
+	{
+		Server_AddNewItem(ItemComponent , Result.bStackable ? Result.TotalRoomToFill : 0);
+	}
+}
+
+void UInv_InventoryComponent::Server_AddNewItem_Implementation(UInv_ItemComponent* ItemComponent, int32 StackCount)
+{
+	UInv_InventoryItem* NewItem = InventoryList.AddEntry(ItemComponent);
+	
+}
+
+void UInv_InventoryComponent::Server_AddStackToItem_Implementation(UInv_ItemComponent* ItemComponent, int32 StackCount,int32 Remainder)
+{
+	
+}
+
+void UInv_InventoryComponent::AddRepSubObj(UObject* SubObj)
+{
+	if (!IsUsingRegisteredSubObjectList() && IsReadyForReplication() && IsValid(SubObj))
+	{
+		AddReplicatedSubObject(SubObj);
+	}
+}
 
 void UInv_InventoryComponent::BeginPlay()
 {

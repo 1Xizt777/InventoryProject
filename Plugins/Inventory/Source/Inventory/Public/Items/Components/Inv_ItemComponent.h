@@ -2,7 +2,9 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "Items/Manifest/Inv_ItemManifest.h"
 #include "Inv_ItemComponent.generated.h"
+
 
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) , Blueprintable)
@@ -14,13 +16,24 @@ public:
 
 	UInv_ItemComponent();
 
+	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
+
+	
+	FInv_ItemManifest GetItemManifest() const {return ItemManifest;}
+	
+	
 	FString GetPickupMessage() const { return PickupMessage; }
+	
+
 	
 protected:
 
 
 private:
 
+	UPROPERTY(Replicated, EditAnywhere , Category = "Inventory" )
+	FInv_ItemManifest ItemManifest;
+	
 	UPROPERTY(EditDefaultsOnly , Category = "Inventory")
 	FString PickupMessage;
 };
