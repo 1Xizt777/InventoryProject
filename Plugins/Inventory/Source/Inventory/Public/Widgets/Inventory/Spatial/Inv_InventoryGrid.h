@@ -4,8 +4,11 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
+#include "Items/Manifest/Inv_ItemManifest.h"
 #include "Inv_InventoryGrid.generated.h"
 
+class UInv_ItemComponent;
+struct FInv_SlotAvailabilityResult;
 class UInv_InventoryItem;
 class UInv_InventoryComponent;
 class UCanvasPanel;
@@ -27,11 +30,17 @@ public:
 	UFUNCTION()
 	void AddItem(UInv_InventoryItem* Item);
 	
+	FInv_SlotAvailabilityResult HasRoomForItem(const UInv_ItemComponent* ItemComponent) ;
+
 private:
 	
 	TWeakObjectPtr<UInv_InventoryComponent> InventoryComponent;
 	
 	void ConstructGrid();
+	
+	FInv_SlotAvailabilityResult HasRoomForItem(const UInv_InventoryItem* Item);
+	FInv_SlotAvailabilityResult HasRoomForItem(const FInv_ItemManifest& Manifest);
+	void AddItemToIndices(const FInv_SlotAvailabilityResult& Result, UInv_InventoryItem* NewItem);
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"),  Category = "Inventory")
 	EInv_ItemCategory ItemCategory;

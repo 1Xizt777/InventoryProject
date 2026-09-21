@@ -9,6 +9,7 @@
 #include "InventoryManagement/Components/Inv_InventoryComponent.h"
 #include "InventoryManagement/Utils/Inv_InventoryStatics.h"
 #include "Items/Inv_InventoryItem.h"
+#include "Items/Components/Inv_ItemComponent.h"
 #include "Widgets/Inventory/GridSlots/Inv_GridSlot.h"
 #include "Widgets/Utils/Inv_WidgetUtils.h"
 
@@ -26,8 +27,44 @@ void UInv_InventoryGrid::AddItem(UInv_InventoryItem* Item)
 {
 	if (!MatchesCategory(Item)) return;
 	
-	UE_LOG(LogTemp, Warning , TEXT("Inv_InentoryGrid : Item Added!"));
+	FInv_SlotAvailabilityResult Result = HasRoomForItem(Item);
+	
+	AddItemToIndices(Result, Item);
 }
+
+
+void UInv_InventoryGrid::AddItemToIndices(const FInv_SlotAvailabilityResult& Result, UInv_InventoryItem* NewItem)
+{
+
+	
+}
+
+
+FInv_SlotAvailabilityResult UInv_InventoryGrid::HasRoomForItem(const UInv_ItemComponent* ItemComponent)
+{
+	return HasRoomForItem(ItemComponent->GetItemManifest());
+}
+
+FInv_SlotAvailabilityResult UInv_InventoryGrid::HasRoomForItem(const UInv_InventoryItem* Item)
+{
+	return HasRoomForItem(Item->GetItemManifest());
+}
+
+FInv_SlotAvailabilityResult UInv_InventoryGrid::HasRoomForItem(const FInv_ItemManifest& Manifest)
+{
+	FInv_SlotAvailabilityResult Result;
+	Result.TotalRoomToFill = 1;
+	
+	FInv_SlotAvailability SlotAvailability;
+	SlotAvailability.AmountToFill = 1;
+	SlotAvailability.Index = 0;
+	
+	Result.SlotAvailabilities.Add(MoveTemp(SlotAvailability)); //移动过去
+	
+	return Result;
+}
+
+
 
 void UInv_InventoryGrid::ConstructGrid()
 {
@@ -52,6 +89,8 @@ void UInv_InventoryGrid::ConstructGrid()
 		}
 	}
 }
+
+
 
 bool UInv_InventoryGrid::MatchesCategory(const UInv_InventoryItem* Item) const
 {

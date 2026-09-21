@@ -6,6 +6,7 @@
 #include "StructUtils/InstancedStruct.h"
 #include "Inv_ItemManifest.generated.h"
 
+struct FInv_ItemFragment;
 enum class EInv_ItemCategory : uint8;
 
 USTRUCT()
@@ -21,9 +22,14 @@ public:
 	FGameplayTag GetItemType() const { return ItemType; }
 private:
 	
+	UPROPERTY(EditDefaultsOnly, Category = "Inventory" , meta = (ExcludeBaseStruct))//排除父类结构体（不能选父类结构体）
+	TArray<TInstancedStruct<FInv_ItemFragment>> Fragments;	//数组
+	
+	
 	UPROPERTY(EditAnywhere, Category = "Inventory")
 	EInv_ItemCategory ItemCategory{EInv_ItemCategory::None};
 
+	
 	UPROPERTY(EditAnywhere, Category = "Inventory")
 	FGameplayTag ItemType;
 
