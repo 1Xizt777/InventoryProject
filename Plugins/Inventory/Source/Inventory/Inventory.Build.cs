@@ -27,7 +27,8 @@ public class Inventory : ModuleRules
 			{
 				"Core",
 				"NetCore",
-				"CoreUObject"
+				"CoreUObject",
+				"GameplayTags"
 				// ... add other public dependencies that you statically link with here ...
 			}
 			);

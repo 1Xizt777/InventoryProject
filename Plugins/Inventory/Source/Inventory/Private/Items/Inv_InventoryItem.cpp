@@ -2,7 +2,6 @@
 
 
 #include "Items/Inv_InventoryItem.h"
-
 #include "Net/UnrealNetwork.h"
 
 void UInv_InventoryItem::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const

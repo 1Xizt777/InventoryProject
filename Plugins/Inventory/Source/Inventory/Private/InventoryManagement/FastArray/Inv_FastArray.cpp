@@ -30,7 +30,7 @@ void FInv_InventoryFastArray::PreReplicatedRemove(const TArrayView<int32> Remove
 	
 	for (int32 Index : RemovedIndices)
 	{
-		IC->OnItemRemoved.Broadcast(Entries[Index].Item);
+		IC->OnItemRemoved.Broadcast(Entries[Index].Item);	//只在客户端回调
 	}
 }
 
@@ -55,7 +55,7 @@ UInv_InventoryItem* FInv_InventoryFastArray::AddEntry(UInv_ItemComponent* ItemCo
 	if (!IsValid(IC)) return nullptr;
 	
 	FInv_InventoryEntry& NewEntry = Entries.AddDefaulted_GetRef();	// 在数组末尾加一个默认构造的元素,返回引用
-	NewEntry.Item = ItemComponent->GetItemManifest().Manifest(OwningActor);
+	NewEntry.Item = ItemComponent->GetItemManifest().Manifest(OwningActor);		//归OwningActor管
 	
 	IC->AddRepSubObj(NewEntry.Item);
 	

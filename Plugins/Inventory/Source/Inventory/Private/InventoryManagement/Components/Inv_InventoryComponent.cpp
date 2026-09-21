@@ -4,7 +4,7 @@
 #include "Widgets/Inventory/InventoryBase/Inv_InventoryBase.h"
 
 
-UInv_InventoryComponent::UInv_InventoryComponent()
+UInv_InventoryComponent::UInv_InventoryComponent() : InventoryList(this)
 {
 	PrimaryComponentTick.bCanEverTick = false;
 	
@@ -59,6 +59,11 @@ void UInv_InventoryComponent::Server_AddNewItem_Implementation(UInv_ItemComponen
 {
 	UInv_InventoryItem* NewItem = InventoryList.AddEntry(ItemComponent);
 	
+	if (GetNetMode() == NM_ListenServer || GetNetMode() == NM_Standalone)
+	{
+		OnItemAdded.Broadcast(NewItem);
+	}
+	
 }
 
 void UInv_InventoryComponent::Server_AddStackToItem_Implementation(UInv_ItemComponent* ItemComponent, int32 StackCount,int32 Remainder)
@@ -68,7 +73,7 @@ void UInv_InventoryComponent::Server_AddStackToItem_Implementation(UInv_ItemComp
 
 void UInv_InventoryComponent::AddRepSubObj(UObject* SubObj)
 {
-	if (!IsUsingRegisteredSubObjectList() && IsReadyForReplication() && IsValid(SubObj))
+	if (IsUsingRegisteredSubObjectList() && IsReadyForReplication() && IsValid(SubObj))
 	{
 		AddReplicatedSubObject(SubObj);
 	}

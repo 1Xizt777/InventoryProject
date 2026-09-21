@@ -15,20 +15,17 @@ class INVENTORY_API UInv_ItemComponent : public UActorComponent
 public:
 
 	UInv_ItemComponent();
-
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 
 	
+	
 	FInv_ItemManifest GetItemManifest() const {return ItemManifest;}
-	
-	
 	FString GetPickupMessage() const { return PickupMessage; }
-	
 
-	
 protected:
 
 
+	
 private:
 
 	UPROPERTY(Replicated, EditAnywhere , Category = "Inventory" )
