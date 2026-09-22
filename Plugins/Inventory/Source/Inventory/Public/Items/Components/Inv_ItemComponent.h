@@ -29,7 +29,7 @@ protected:
 private:
 
 	UPROPERTY(Replicated, EditAnywhere , Category = "Inventory" )
-	FInv_ItemManifest ItemManifest;
+	FInv_ItemManifest ItemManifest;		//该结构体会网络复制
 	
 	UPROPERTY(EditDefaultsOnly , Category = "Inventory")
 	FString PickupMessage;

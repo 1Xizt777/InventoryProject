@@ -11,4 +11,5 @@ UInv_InventoryItem* FInv_ItemManifest::Manifest(UObject* NewOuter)
 	Item->SetItemManifest(*this);	//灌数据（目前只有EItemCategory）
 	
 	return Item;
+	
 }

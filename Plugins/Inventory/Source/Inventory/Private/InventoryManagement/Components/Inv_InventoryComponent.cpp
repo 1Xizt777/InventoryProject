@@ -50,7 +50,7 @@ void UInv_InventoryComponent::TryAddItem(UInv_ItemComponent* ItemComponent)
 		Server_AddStackToItem(ItemComponent , Result.TotalRoomToFill , Result.Remainder);
 	}
 	else if (Result.TotalRoomToFill > 0)
-	{
+	{ 
 		Server_AddNewItem(ItemComponent , Result.bStackable ? Result.TotalRoomToFill : 0);
 	}
 }

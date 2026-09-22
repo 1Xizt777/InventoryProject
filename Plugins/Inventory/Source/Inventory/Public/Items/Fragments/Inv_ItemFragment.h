@@ -74,3 +74,23 @@ private:
 };
 
 
+
+USTRUCT(BlueprintType)
+struct FInv_StackableFragment : public FInv_ItemFragment
+{
+	GENERATED_BODY()
+
+	
+public:
+	
+	int32 GetMaxStackSize() const { return MaxStackSize; }
+	int32 GetStackCount() const { return StackCount; }
+	
+private:
+	
+	UPROPERTY(EditDefaultsOnly, Category = "Inventory")
+	int32 MaxStackSize{1};
+	
+	UPROPERTY(EditDefaultsOnly, Category = "Inventory")
+	int32 StackCount{1};
+};
