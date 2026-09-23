@@ -46,9 +46,11 @@ struct FInv_GridFragment : public FInv_ItemFragment
 
 private:
 
+	//该物品占几格
 	UPROPERTY(EditAnywhere, Category = "Inventory")
 	FIntPoint GridSize{1, 1};
 
+	//图标间隔
 	UPROPERTY(EditAnywhere, Category = "Inventory")
 	float GridPadding{0.f};
 	
@@ -66,9 +68,11 @@ public:
 	
 private:
 	
+	//该物品图标
 	UPROPERTY(EditAnywhere, Category = "Inventory")
 	TObjectPtr<UTexture2D> Icon{nullptr};
 	
+	//图标大小
 	UPROPERTY(EditAnywhere, Category = "Inventory")
 	FVector2D IconDimension{44.f,44.f};
 };
@@ -88,9 +92,11 @@ public:
 	
 private:
 	
+	//单格最多能叠多少个
 	UPROPERTY(EditDefaultsOnly, Category = "Inventory")
-	int32 MaxStackSize{1};
+	int32 MaxStackSize{1};	
 	
+	//拾取一次有几个
 	UPROPERTY(EditDefaultsOnly, Category = "Inventory")
-	int32 StackCount{1};
+	int32 StackCount{1};	
 };

@@ -21,9 +21,15 @@ public:
 	EInv_ItemCategory GetItemCategory() const { return ItemCategory; }
 	FGameplayTag GetItemType() const { return ItemType; }
 	
+	
 	template<typename T>
 	requires std::derived_from<T, FInv_ItemFragment>	//传入的T 只能是FInv_ItemFragment的派生
 	const T* GetFragmentOfTypeWitchTag(const FGameplayTag& Tag) const;
+	
+	template<typename T>
+	requires std::derived_from<T, FInv_ItemFragment>	//传入的T 只能是FInv_ItemFragment的派生
+	const T* GetFragmentOfType() const;
+	
 private:
 	
 	UPROPERTY(EditDefaultsOnly, Category = "Inventory" , meta = (ExcludeBaseStruct))//排除父类结构体（不能选父类结构体）
@@ -48,6 +54,22 @@ const T* FInv_ItemManifest::GetFragmentOfTypeWitchTag(const FGameplayTag& Tag) c
 		if (const T* FragmentPtr = Fragment.GetPtr<T>())
 		{
 			if (!FragmentPtr->GetFragmentTag().MatchesTagExact(Tag)) continue;
+			return FragmentPtr;
+		}
+	}
+	return nullptr;
+}
+
+
+
+template <typename T> 
+requires std::derived_from<T, FInv_ItemFragment>
+const T* FInv_ItemManifest::GetFragmentOfType() const
+{
+	for (const auto& Fragment : Fragments)
+	{
+		if (const T* FragmentPtr = Fragment.GetPtr<T>())
+		{
 			return FragmentPtr;
 		}
 	}

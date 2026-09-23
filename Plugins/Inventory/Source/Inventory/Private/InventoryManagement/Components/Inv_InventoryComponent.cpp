@@ -1,8 +1,10 @@
 #include "InventoryManagement/Components/Inv_InventoryComponent.h"
 
+#include "InventoryManagement/Utils/Inv_InventoryStatics.h"
+#include "Items/Components/Inv_ItemComponent.h"
 #include "Net/UnrealNetwork.h"
 #include "Widgets/Inventory/InventoryBase/Inv_InventoryBase.h"
-
+#include "Items/Inv_InventoryItem.h"
 
 UInv_InventoryComponent::UInv_InventoryComponent() : InventoryList(this)
 {
@@ -39,17 +41,22 @@ void UInv_InventoryComponent::TryAddItem(UInv_ItemComponent* ItemComponent)
 {
 	FInv_SlotAvailabilityResult Result = InventoryMenu->HasRoomForItem(ItemComponent);
 	
+	
+	UInv_InventoryItem* FoundItem = InventoryList.FindFirstItemByType(ItemComponent->GetItemManifest().GetItemType());
+	Result.Item = FoundItem;
+	
 	if (Result.TotalRoomToFill == 0)
 	{
 		NoRoomInInventory.Broadcast();		//背包没有空间
 		return;
 	}
 	
-	if (Result.Item.IsValid() && Result.bStackable)
+	if (Result.Item.IsValid() && Result.bStackable)		//往上堆叠
 	{
 		Server_AddStackToItem(ItemComponent , Result.TotalRoomToFill , Result.Remainder);
 	}
-	else if (Result.TotalRoomToFill > 0)
+	
+	else if (Result.TotalRoomToFill > 0)	//背包还有位置
 	{ 
 		Server_AddNewItem(ItemComponent , Result.bStackable ? Result.TotalRoomToFill : 0);
 	}

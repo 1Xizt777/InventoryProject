@@ -1,7 +1,6 @@
 ﻿#include "InventoryManagement/FastArray/Inv_FastArray.h"
 
 #include "ToolMenusEditor.h"
-#include "Components/InstancedStaticMeshComponent.h"
 #include "InventoryManagement/Components/Inv_InventoryComponent.h"
 #include "Items/Inv_InventoryItem.h"
 #include "Items/Components/Inv_ItemComponent.h"
@@ -45,19 +44,21 @@ void FInv_InventoryFastArray::PostReplicatedAdd(const TArrayView<int32> AddedInd
 	}
 }
 
-UInv_InventoryItem* FInv_InventoryFastArray::AddEntry(UInv_ItemComponent* ItemComponent)	//玩家捡起地上的东西
+UInv_InventoryItem* FInv_InventoryFastArray::AddEntry(UInv_ItemComponent* ItemComponent)	//玩家捡起地上的新东西
 {
-	check(OwnerComponent);
+	check(OwnerComponent); //OwnerComponent一般情况下是UInv_InventoryComponent
+	
 	AActor* OwningActor = Cast<AActor>(OwnerComponent->GetOwner());
+	
 	check(OwningActor->HasAuthority());
 	
 	UInv_InventoryComponent* IC = Cast<UInv_InventoryComponent>(OwnerComponent);
 	if (!IsValid(IC)) return nullptr;
 	
-	FInv_InventoryEntry& NewEntry = Entries.AddDefaulted_GetRef();	// 在数组末尾加一个默认构造的元素,返回引用
-	NewEntry.Item = ItemComponent->GetItemManifest().Manifest(OwningActor);		//归OwningActor管
+	FInv_InventoryEntry& NewEntry = Entries.AddDefaulted_GetRef();			//在数组末尾加一个默认构造的元素,返回引用
+	NewEntry.Item = ItemComponent->GetItemManifest().Manifest(OwningActor);		//归OwningActor管（这一行New了Item出来）
 	
-	IC->AddRepSubObj(NewEntry.Item);
+	IC->AddRepSubObj(NewEntry.Item);		//注册成复制子对象
 	
 	MarkItemDirty(NewEntry);
 	
@@ -88,4 +89,14 @@ void FInv_InventoryFastArray::RemoveEntry(UInv_InventoryItem* Item)
 			MarkArrayDirty();
 		}
 	}
+}
+
+UInv_InventoryItem* FInv_InventoryFastArray::FindFirstItemByType(const FGameplayTag& ItemType)
+{
+	auto FoundItem = Entries.FindByPredicate([ItemType = ItemType](const FInv_InventoryEntry& Entry)
+	{
+		return IsValid(Entry.Item) && Entry.Item->GetItemManifest().GetItemType().MatchesTagExact(ItemType);
+	});
+	
+	return FoundItem ? FoundItem->Item : nullptr;
 }

@@ -15,7 +15,6 @@ enum class EInv_ItemCategory : uint8
 
 
 
-
 USTRUCT()
 struct FInv_SlotAvailability
 {
@@ -29,7 +28,10 @@ struct FInv_SlotAvailability
 	int32 Index{INDEX_NONE};		//这个格子的下标
 	int32 AmountToFill{0};			//这个格子能装下多少个
 	bool bItemAtIndex{false};		//这个格子上本来有没有同一物品
+	
 };
+
+
 
 USTRUCT()
 struct FInv_SlotAvailabilityResult

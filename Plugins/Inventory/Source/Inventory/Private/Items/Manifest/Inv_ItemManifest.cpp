@@ -8,7 +8,7 @@ UInv_InventoryItem* FInv_ItemManifest::Manifest(UObject* NewOuter)
 {
 	UInv_InventoryItem* Item = NewObject<UInv_InventoryItem>(NewOuter ,UInv_InventoryItem::StaticClass());	//创建空壳
 	
-	Item->SetItemManifest(*this);	//灌数据（目前只有EItemCategory）
+	Item->SetItemManifest(*this);	//灌数据（目前只有EItemCategory 和 Fragment）
 	
 	return Item;
 	
