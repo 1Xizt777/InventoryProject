@@ -1,10 +1,10 @@
 #include "InventoryManagement/Components/Inv_InventoryComponent.h"
 
-#include "InventoryManagement/Utils/Inv_InventoryStatics.h"
 #include "Items/Components/Inv_ItemComponent.h"
 #include "Net/UnrealNetwork.h"
 #include "Widgets/Inventory/InventoryBase/Inv_InventoryBase.h"
 #include "Items/Inv_InventoryItem.h"
+#include "Items/Fragments/Inv_ItemFragment.h"
 
 UInv_InventoryComponent::UInv_InventoryComponent() : InventoryList(this)
 {
@@ -39,7 +39,8 @@ void UInv_InventoryComponent::ToggleInventoryMenu()
 
 void UInv_InventoryComponent::TryAddItem(UInv_ItemComponent* ItemComponent)
 {
-	FInv_SlotAvailabilityResult Result = InventoryMenu->HasRoomForItem(ItemComponent);
+	
+	FInv_SlotAvailabilityResult Result = InventoryMenu->HasRoomForItem(ItemComponent);		//经过一系列判断的Result
 	
 	
 	UInv_InventoryItem* FoundItem = InventoryList.FindFirstItemByType(ItemComponent->GetItemManifest().GetItemType());
@@ -53,6 +54,7 @@ void UInv_InventoryComponent::TryAddItem(UInv_ItemComponent* ItemComponent)
 	
 	if (Result.Item.IsValid() && Result.bStackable)		//往上堆叠
 	{
+		OnStackChanged.Broadcast(Result);
 		Server_AddStackToItem(ItemComponent , Result.TotalRoomToFill , Result.Remainder);
 	}
 	
@@ -66,15 +68,33 @@ void UInv_InventoryComponent::Server_AddNewItem_Implementation(UInv_ItemComponen
 {
 	UInv_InventoryItem* NewItem = InventoryList.AddEntry(ItemComponent);
 	
+	NewItem->SetTotalStackCount(StackCount);
+	
 	if (GetNetMode() == NM_ListenServer || GetNetMode() == NM_Standalone)
 	{
 		OnItemAdded.Broadcast(NewItem);
 	}
 	
+	ItemComponent->PickUp();
 }
 
 void UInv_InventoryComponent::Server_AddStackToItem_Implementation(UInv_ItemComponent* ItemComponent, int32 StackCount,int32 Remainder)
 {
+	const FGameplayTag ItemType = IsValid(ItemComponent) ? ItemComponent->GetItemManifest().GetItemType() : FGameplayTag::EmptyTag;
+	UInv_InventoryItem* Item = InventoryList.FindFirstItemByType(ItemType);
+	if (!IsValid(Item)) return;
+	
+	Item->SetTotalStackCount(Item->GetTotalStackCount() + StackCount);
+	
+	
+	if (Remainder == 0)
+	{
+		ItemComponent->PickUp();
+	}
+	else if (FInv_StackableFragment* StackableFragment = ItemComponent->GetItemManifest().GetFragmentOfTypeMutable<FInv_StackableFragment>())
+	{
+		StackableFragment->SetStackCount(Remainder); 
+	}
 	
 }
 

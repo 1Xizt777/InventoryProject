@@ -20,15 +20,23 @@ public:
 	virtual bool IsSupportedForNetworking() const override { return true; }
 	
 	void SetItemManifest(const FInv_ItemManifest& Manifest);
-
 	const FInv_ItemManifest& GetItemManifest() const { return ItemManifest.Get<FInv_ItemManifest>(); }
 	FInv_ItemManifest& GetItemManifestMutable() { return ItemManifest.GetMutable<FInv_ItemManifest>(); }
 	
 	bool IsStackable() const;
+	
+	int32 GetTotalStackCount() const { return TotalStackCount; }
+	void SetTotalStackCount(int32 Count) { TotalStackCount = Count; }
+	
 private:
 	
 	UPROPERTY(VisibleAnywhere ,meta=(BaseStruct = "/Script/Inventory.Inv_ItemManifest") , Replicated)
 	FInstancedStruct ItemManifest;
+	
+	
+	UPROPERTY(Replicated)
+	int32 TotalStackCount{0};
+	
 };
 
 

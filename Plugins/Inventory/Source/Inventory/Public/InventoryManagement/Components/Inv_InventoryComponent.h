@@ -6,6 +6,7 @@
 #include "Inv_InventoryComponent.generated.h"
 
 
+struct FInv_SlotAvailabilityResult;
 struct FInv_InventoryFastArray;
 class UInv_InventoryItem;
 class UInv_InventoryBase;
@@ -13,6 +14,7 @@ class UInv_ItemComponent;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FInventoryItemChanged , UInv_InventoryItem* , Item);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FNoRoomInInventory);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FStackChanged , const FInv_SlotAvailabilityResult&  ,Result);
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent),Blueprintable)
 class INVENTORY_API UInv_InventoryComponent : public UActorComponent
@@ -30,7 +32,7 @@ public:
 	FInventoryItemChanged OnItemAdded;
 	FInventoryItemChanged OnItemRemoved;
 	FNoRoomInInventory NoRoomInInventory;
-	
+	FStackChanged OnStackChanged;
 	
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly , Category = "Inventory")
 	void TryAddItem(UInv_ItemComponent* ItemComponent);

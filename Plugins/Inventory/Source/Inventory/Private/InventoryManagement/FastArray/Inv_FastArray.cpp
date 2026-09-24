@@ -91,11 +91,11 @@ void FInv_InventoryFastArray::RemoveEntry(UInv_InventoryItem* Item)
 	}
 }
 
-UInv_InventoryItem* FInv_InventoryFastArray::FindFirstItemByType(const FGameplayTag& ItemType)
-{
-	auto FoundItem = Entries.FindByPredicate([ItemType = ItemType](const FInv_InventoryEntry& Entry)
+UInv_InventoryItem* FInv_InventoryFastArray::FindFirstItemByType(const FGameplayTag& ItemType)	//可以精准找到相应的物品：GameItems.Consumables.Potions.Red.Small
+{																	//[ 新名字 = 外部表达式 ]
+	auto FoundItem = Entries.FindByPredicate([WantedItemType = ItemType](const FInv_InventoryEntry& Entry)
 	{
-		return IsValid(Entry.Item) && Entry.Item->GetItemManifest().GetItemType().MatchesTagExact(ItemType);
+		return IsValid(Entry.Item) && Entry.Item->GetItemManifest().GetItemType().MatchesTagExact(WantedItemType);
 	});
 	
 	return FoundItem ? FoundItem->Item : nullptr;

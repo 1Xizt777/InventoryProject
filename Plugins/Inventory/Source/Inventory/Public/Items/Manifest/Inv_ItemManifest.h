@@ -30,6 +30,10 @@ public:
 	requires std::derived_from<T, FInv_ItemFragment>	//传入的T 只能是FInv_ItemFragment的派生
 	const T* GetFragmentOfType() const;
 	
+	template<typename T>
+	requires std::derived_from<T, FInv_ItemFragment>	//传入的T 只能是FInv_ItemFragment的派生
+	T* GetFragmentOfTypeMutable();
+	
 private:
 	
 	UPROPERTY(EditDefaultsOnly, Category = "Inventory" , meta = (ExcludeBaseStruct))//排除父类结构体（不能选父类结构体）
@@ -69,6 +73,21 @@ const T* FInv_ItemManifest::GetFragmentOfType() const
 	for (const auto& Fragment : Fragments)
 	{
 		if (const T* FragmentPtr = Fragment.GetPtr<T>())
+		{
+			return FragmentPtr;
+		}
+	}
+	return nullptr;
+}
+
+
+
+template <typename T> requires std::derived_from<T, FInv_ItemFragment>
+T* FInv_ItemManifest::GetFragmentOfTypeMutable()
+{
+	for (auto& Fragment : Fragments)
+	{
+		if (T* FragmentPtr = Fragment.GetMutablePtr<T>())
 		{
 			return FragmentPtr;
 		}

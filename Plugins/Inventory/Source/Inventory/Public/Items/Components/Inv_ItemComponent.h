@@ -22,8 +22,14 @@ public:
 	FInv_ItemManifest GetItemManifest() const {return ItemManifest;}
 	FString GetPickupMessage() const { return PickupMessage; }
 
+	
+	void PickUp();
+	
 protected:
 
+	//蓝图函数，可播放相关特效
+	UFUNCTION(BlueprintImplementableEvent , Category = "Inventory")
+	void OnPickUp();
 
 	
 private:
