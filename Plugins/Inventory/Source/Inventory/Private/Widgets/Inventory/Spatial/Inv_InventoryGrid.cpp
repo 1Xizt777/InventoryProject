@@ -11,6 +11,7 @@
 #include "Items/Fragments/Inv_FragmentTags.h"
 #include "Items/Fragments/Inv_ItemFragment.h"
 #include "Widgets/Inventory/GridSlots/Inv_GridSlot.h"
+#include "Widgets/Inventory/HoverItem/Inv_HoverItem.h"
 #include "Widgets/Inventory/SlottedItems/Inv_SlottedItem.h"
 #include "Widgets/Utils/Inv_WidgetUtils.h"
 
@@ -24,6 +25,19 @@ void UInv_InventoryGrid::NativeOnInitialized()
 	InventoryComponent->OnItemAdded.AddDynamic(this , &ThisClass::AddItem);
 	InventoryComponent->OnStackChanged.AddDynamic(this , &ThisClass::AddStacks);	
 }
+
+void UInv_InventoryGrid::OnSlottedItemClicked(int32 GridIndex, const FPointerEvent& MouseEvent)
+{
+	check(GridSlots.IsValidIndex(GridIndex));
+	UInv_InventoryItem* ClickInventoryItem = GridSlots[GridIndex]->GetInventoryItem().Get();
+	
+	if (!IsValid(HoverItem) && IsLeftClicked(MouseEvent))
+	{
+		PickUp(ClickInventoryItem , GridIndex);
+	}
+	
+}
+
 
 
 void UInv_InventoryGrid::AddItem(UInv_InventoryItem* Item)
@@ -44,18 +58,22 @@ void UInv_InventoryGrid::AddStacks(const FInv_SlotAvailabilityResult& Result)
 	{
 		if (Availability.bItemAtIndex)
 		{
+			// 只更新数字，【不创建】新图标
 			const auto& GridSlot = GridSlots[Availability.Index];
 			const auto& SlottedItem = SlottedItems.FindChecked(Availability.Index);
-			SlottedItem->UpdateStackCount(GridSlot->GetStackCount() + Availability.AmountToFill);
-			GridSlot->SetStackCount(GridSlot->GetStackCount() + Availability.AmountToFill);	
+			SlottedItem->UpdateStackCount(GridSlot->GetStackCount() + Availability.AmountToFill);	//更新数量差额给UI
+			GridSlot->SetStackCount(GridSlot->GetStackCount() + Availability.AmountToFill);			//更新自己的数量
 		}
 		else
 		{
+			// 创建图标 + 标记格子
 			AddItemAtIndex(Result.Item.Get() , Availability.Index , Result.bStackable , Availability.AmountToFill);
 			UpdateGridSlots(Result.Item.Get() , Availability.Index , Result.bStackable , Availability.AmountToFill);
 		}
 	}
 }
+
+
 
 
 void UInv_InventoryGrid::AddItemToIndices(const FInv_SlotAvailabilityResult& Result, UInv_InventoryItem* NewItem)
@@ -101,6 +119,8 @@ UInv_SlottedItem* UInv_InventoryGrid::CreateSlottedItem(UInv_InventoryItem* Item
 	
 	const int32 StackUpdateAmount = bStackable ? StackAmount : 0;	//如果可堆叠，更新右下角数量标
 	SlottedItem->UpdateStackCount(StackUpdateAmount);	
+	
+	SlottedItem->OnSlottedItemClicked.AddDynamic(this,&ThisClass::OnSlottedItemClicked);
 	
 	return SlottedItem;
 }
@@ -216,6 +236,7 @@ FInv_SlotAvailabilityResult UInv_InventoryGrid::HasRoomForItem(const FInv_ItemMa
 		// Update the amount left to fill
 		Result.TotalRoomToFill += AmountToFillInSlot;
 		
+		//直接构造一个FInv_SlotAvailability塞进去
 		Result.SlotAvailabilities.Emplace(		
 			FInv_SlotAvailability{
 			HasValidItem(GridSlot) ? GridSlot->GetUpperLeftIndex() : GridSlot->GetTileIndex(),
@@ -327,10 +348,84 @@ bool UInv_InventoryGrid::DoesItemTypeMatch(const UInv_InventoryItem* SubItem, co
 	return SubItem->GetItemManifest().GetItemType().MatchesTagExact(ItemType);
 }
 
+bool UInv_InventoryGrid::IsLeftClicked(const FPointerEvent& MouseEvent) const
+{
+	return MouseEvent.GetEffectingButton() == EKeys::LeftMouseButton;
+}
+
+bool UInv_InventoryGrid::IsRightClicked(const FPointerEvent& MouseEvent) const
+{
+	return MouseEvent.GetEffectingButton() == EKeys::RightMouseButton;
+}
+
+void UInv_InventoryGrid::PickUp(UInv_InventoryItem* ClickedInventoryItem, const int32 GridIndex)
+{
+	AssignHoverItem(ClickedInventoryItem , GridIndex  , GridIndex);
+	RemoveItemFromGrid(ClickedInventoryItem, GridIndex);
+}
+void UInv_InventoryGrid::AssignHoverItem(UInv_InventoryItem* InventoryItem, const int32 GridIndex,const int32 PreviousGridIndex)
+{
+	AssignHoverItem(InventoryItem);
+	
+	HoverItem->SetPreviousGridIndex(PreviousGridIndex);
+	HoverItem->UpdateStackCount(InventoryItem->IsStackable() ? GridSlots[GridIndex]->GetStackCount() : 1);
+}
+
+
+void UInv_InventoryGrid::AssignHoverItem(UInv_InventoryItem* InventoryItem)
+{
+	if (!IsValid(HoverItem))
+	{
+		HoverItem = CreateWidget<UInv_HoverItem>(GetOwningPlayer() , HoverItemClass);
+	}
+	
+	const FInv_GridFragment* GridFragment = GetFragment<FInv_GridFragment>(InventoryItem, FragmentTags::GridFragment);
+	const FInv_ImageFragment* ImageFragment = GetFragment<FInv_ImageFragment>(InventoryItem, FragmentTags::ImageFragment);
+	if (!GridFragment || !ImageFragment) return;
+	
+	const FVector2D DrawSize = GetDrawSize(GridFragment);
+	
+	FSlateBrush IconBrush;
+	IconBrush.SetResourceObject(ImageFragment->GetIcon());
+	IconBrush.DrawAs = ESlateBrushDrawType::Image;
+	IconBrush.ImageSize = DrawSize * UWidgetLayoutLibrary::GetViewportScale(this);
+	
+	HoverItem->SetImageBrush(IconBrush);
+	HoverItem->SetGridDimensions(GridFragment->GetGridSize());
+	HoverItem->SetInventoryItem(InventoryItem);
+	HoverItem->SetIsStackable(InventoryItem->IsStackable());
+	
+	GetOwningPlayer()->SetMouseCursorWidget(EMouseCursor::Default , HoverItem);
+}
+void UInv_InventoryGrid::RemoveItemFromGrid(UInv_InventoryItem* InventoryItem, const int32 GridIndex)
+{
+	const FInv_GridFragment* GridFragment = GetFragment<FInv_GridFragment>(InventoryItem, FragmentTags::GridFragment);
+	if (!(GridFragment)) return;
+	
+	//遍历每一格清空数据，回到没有放置物品状态
+	UInv_InventoryStatics::ForEach2D(GridSlots , GridIndex , GridFragment->GetGridSize() , Columns , [](UInv_GridSlot* GridSlot)
+	{
+		GridSlot->SetTileIndex(INDEX_NONE);
+		GridSlot->SetUnoccupiedTexture();
+		GridSlot->SetAvailable(true);
+		GridSlot->SetStackCount(0);
+		GridSlot->SetInventoryItem(nullptr);
+	});
+	
+	//从TMap获取那个SlottedItem
+	if (SlottedItems.Contains(GridIndex))
+	{
+		TObjectPtr<UInv_SlottedItem> FoundSlottedItem;
+		SlottedItems.RemoveAndCopyValue(GridIndex , FoundSlottedItem);
+		FoundSlottedItem->RemoveFromParent();		//真正去掉SlottedItem的图标等
+	}
+	
+}
+
 
 
 int32 UInv_InventoryGrid::DetermineFillAmountForSlot(const bool bStackable, const int32 MaxStackSize,
-	const int32 AmountToFill, const UInv_GridSlot* GridSlot) const
+                                                     const int32 AmountToFill, const UInv_GridSlot* GridSlot) const
 {
 	const int32 RoomInSlot = MaxStackSize - GetStackAmount(GridSlot);		//还能放下几个
 	return bStackable ? FMath::Min(AmountToFill, RoomInSlot) : 1;		//单次拾取数量和格子剩余容量谁小

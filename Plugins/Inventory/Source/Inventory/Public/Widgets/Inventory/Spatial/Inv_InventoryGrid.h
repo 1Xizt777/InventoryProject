@@ -8,6 +8,7 @@
 #include "Items/Manifest/Inv_ItemManifest.h"
 #include "Inv_InventoryGrid.generated.h"
 
+class UInv_HoverItem;
 class UInv_SlottedItem;
 class UInv_ItemComponent;
 struct FInv_SlotAvailabilityResult;
@@ -97,11 +98,21 @@ private:
 	UFUNCTION()
 	void AddStacks(const FInv_SlotAvailabilityResult& Result);
 	
+	UFUNCTION()
+	void OnSlottedItemClicked(int32  GridIndex , const FPointerEvent& MouseEvent);
+	
+	bool IsLeftClicked(const FPointerEvent& MouseEvent) const;
+	bool IsRightClicked(const FPointerEvent& MouseEvent) const;
+	void PickUp(UInv_InventoryItem* ClickedInventoryItem , const int32 GridIndex);
+	void AssignHoverItem(UInv_InventoryItem* InventoryItem);
+	void AssignHoverItem(UInv_InventoryItem* InventoryItem , const int32 GridIndex , const int32 PreviousGridIndex);
+	void RemoveItemFromGrid(UInv_InventoryItem* InventoryItem , const int32 GridIndex);
+	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"),  Category = "Inventory")
 	EInv_ItemCategory ItemCategory;	//这页GridSlot的类型
 	
 	UPROPERTY()
-	TMap<int32 , UInv_SlottedItem*>SlottedItems;
+	TMap<int32 , TObjectPtr<UInv_SlottedItem>>SlottedItems;
 	
 	UPROPERTY()
 	TArray<TObjectPtr<UInv_GridSlot>> GridSlots;
@@ -124,6 +135,11 @@ private:
 	UPROPERTY(EditAnywhere,Category ="Inventory")
 	float TileSize;  //默认值为54
 	
-	
 	bool MatchesCategory(const UInv_InventoryItem* Item) const;
+	
+	UPROPERTY(EditDefaultsOnly , Category = "Inventory")
+	TSubclassOf<UInv_HoverItem> HoverItemClass;
+	
+	UPROPERTY()
+	TObjectPtr<UInv_HoverItem> HoverItem;
 };

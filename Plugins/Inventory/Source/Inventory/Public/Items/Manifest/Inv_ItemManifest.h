@@ -19,6 +19,7 @@ public:
 	UInv_InventoryItem* Manifest(UObject* NewOuter);
 	
 	EInv_ItemCategory GetItemCategory() const { return ItemCategory; }
+	
 	FGameplayTag GetItemType() const { return ItemType; }
 	
 	

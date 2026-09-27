@@ -50,7 +50,10 @@ public:
 private:
 	
 	int32 TileIndex;
+	
+	//此StackCount是给算法用的，
 	int32 StackCount;
+	
 	int32 UpperLeftIndex = {INDEX_NONE};
 	TWeakObjectPtr<UInv_InventoryItem> InventoryItem;
 	bool bAvailable;

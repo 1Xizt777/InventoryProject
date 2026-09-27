@@ -16,14 +16,13 @@ enum class EInv_ItemCategory : uint8
 
 
 USTRUCT()
-struct FInv_SlotAvailability
+struct FInv_SlotAvailability	//「格子容量信息」（描述"第几个格子，能装多少，那里本来有没有东西"）
 {
 	GENERATED_BODY()
 
 	FInv_SlotAvailability() {}
 	FInv_SlotAvailability(int32 ItemIndex, int32 Room, bool bHasItem) : Index(ItemIndex), AmountToFill(Room), bItemAtIndex(bHasItem) {}
-	
-	//「格子容量信息」（描述"第几个格子，能装多少，那里本来有没有东西"）
+
 	
 	int32 Index{INDEX_NONE};		//这个格子的下标
 	int32 AmountToFill{0};			//这个格子能装下多少个

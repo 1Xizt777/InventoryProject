@@ -44,7 +44,7 @@ void FInv_InventoryFastArray::PostReplicatedAdd(const TArrayView<int32> AddedInd
 	}
 }
 
-UInv_InventoryItem* FInv_InventoryFastArray::AddEntry(UInv_ItemComponent* ItemComponent)	//玩家捡起地上的新东西
+UInv_InventoryItem* FInv_InventoryFastArray::AddEntry(UInv_ItemComponent* ItemComponent) 	//玩家捡起地上的新东西
 {
 	check(OwnerComponent); //OwnerComponent一般情况下是UInv_InventoryComponent
 	

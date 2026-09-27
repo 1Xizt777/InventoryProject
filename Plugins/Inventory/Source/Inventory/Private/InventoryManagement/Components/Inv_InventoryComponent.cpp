@@ -58,7 +58,7 @@ void UInv_InventoryComponent::TryAddItem(UInv_ItemComponent* ItemComponent)
 		Server_AddStackToItem(ItemComponent , Result.TotalRoomToFill , Result.Remainder);
 	}
 	
-	else if (Result.TotalRoomToFill > 0)	//背包还有位置
+	else if (Result.TotalRoomToFill > 0)	//背包没有，新创建物品
 	{ 
 		Server_AddNewItem(ItemComponent , Result.bStackable ? Result.TotalRoomToFill : 0);
 	}
@@ -68,7 +68,7 @@ void UInv_InventoryComponent::Server_AddNewItem_Implementation(UInv_ItemComponen
 {
 	UInv_InventoryItem* NewItem = InventoryList.AddEntry(ItemComponent);
 	
-	NewItem->SetTotalStackCount(StackCount);
+	NewItem->SetTotalStackCount(StackCount);	//更新数量
 	
 	if (GetNetMode() == NM_ListenServer || GetNetMode() == NM_Standalone)
 	{
@@ -84,16 +84,16 @@ void UInv_InventoryComponent::Server_AddStackToItem_Implementation(UInv_ItemComp
 	UInv_InventoryItem* Item = InventoryList.FindFirstItemByType(ItemType);
 	if (!IsValid(Item)) return;
 	
-	Item->SetTotalStackCount(Item->GetTotalStackCount() + StackCount);
+	Item->SetTotalStackCount(Item->GetTotalStackCount() + StackCount);	//更新数量
 	
 	
 	if (Remainder == 0)
 	{
 		ItemComponent->PickUp();
 	}
-	else if (FInv_StackableFragment* StackableFragment = ItemComponent->GetItemManifest().GetFragmentOfTypeMutable<FInv_StackableFragment>())
+	else if (FInv_StackableFragment* StackableFragment = ItemComponent->GetItemManifestMutable().GetFragmentOfTypeMutable<FInv_StackableFragment>())
 	{
-		StackableFragment->SetStackCount(Remainder); 
+		StackableFragment->SetStackCount(Remainder);	//把地上的物品数量改成 Remainder
 	}
 	
 }

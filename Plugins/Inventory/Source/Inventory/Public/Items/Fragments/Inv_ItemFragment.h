@@ -99,7 +99,7 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = "Inventory")
 	int32 MaxStackSize{1};	
 	
-	//拾取一次有几个
+	//拾取一次给几个
 	UPROPERTY(EditDefaultsOnly, Category = "Inventory")
 	int32 StackCount{1};	
 };

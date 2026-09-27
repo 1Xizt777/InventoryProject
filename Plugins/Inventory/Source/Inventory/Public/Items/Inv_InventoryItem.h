@@ -35,7 +35,7 @@ private:
 	
 	
 	UPROPERTY(Replicated)
-	int32 TotalStackCount{0};
+	int32 TotalStackCount{0};	//我这种物品有几个
 	
 };
 
