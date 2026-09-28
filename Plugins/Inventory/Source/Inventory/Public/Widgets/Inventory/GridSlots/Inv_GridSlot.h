@@ -49,14 +49,14 @@ public:
 	void SetGrayedOutTexture();
 private:
 	
-	int32 TileIndex;
+	int32 TileIndex{INDEX_NONE};
 	
 	//此StackCount是给算法用的，
-	int32 StackCount;
+	int32 StackCount{0};
 	
 	int32 UpperLeftIndex = {INDEX_NONE};
 	TWeakObjectPtr<UInv_InventoryItem> InventoryItem;
-	bool bAvailable;
+	bool bAvailable{true};
 	
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UImage> Image_GridSlot;

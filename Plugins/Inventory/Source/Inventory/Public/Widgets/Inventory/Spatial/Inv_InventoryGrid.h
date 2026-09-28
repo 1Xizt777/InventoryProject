@@ -17,6 +17,7 @@ class UInv_InventoryComponent;
 class UCanvasPanel;
 class UInv_GridSlot;
 enum class EInv_ItemCategory : uint8;
+enum class EInv_GridSlotState : uint8;
 /**
  * 
  */
@@ -27,7 +28,7 @@ class INVENTORY_API UInv_InventoryGrid : public UUserWidget
 	
 public:
 	virtual void NativeOnInitialized() override;
-	
+	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
 	EInv_ItemCategory GetItemCategory() const { return ItemCategory; }
 	
 	UFUNCTION()
@@ -108,6 +109,19 @@ private:
 	void AssignHoverItem(UInv_InventoryItem* InventoryItem , const int32 GridIndex , const int32 PreviousGridIndex);
 	void RemoveItemFromGrid(UInv_InventoryItem* InventoryItem , const int32 GridIndex);
 	
+	void UpdateTileParamerters(const FVector2D CanvasPosition , const FVector2D MousePosition);
+	FIntPoint CalculateHoverCoordinates(const FVector2D CanvasPosition , const FVector2D MousePosition) const;
+	EInv_TileQuadrant CalculateTileQuadrant(const FVector2D CanvasPosition , const FVector2D MousePosition) const;
+	void OnTileParametersUpdated(const FInv_TileParameters& Parameters);
+	FIntPoint CalculateStartingCoordinate(const FIntPoint& Coordinate , const FIntPoint& Dimensions , const EInv_TileQuadrant Quadrant) const;
+	FInv_SpaceQueryResuly CheckHoverPosition(const FIntPoint& Position , const FIntPoint& Dimensions);
+	bool CursorExitedCanvas(const FVector2D& BoundaryPosition , const FVector2D BoundarySize , const FVector2D Location);
+	
+	void HighlightSlots(const int32 Index , const FIntPoint& Dimensions);
+	void UnHighlightSlots(const int32 Index , const FIntPoint& Dimensions);
+	
+	void ChangeHoverType(const int32 Index , const FIntPoint& Dimensions , EInv_GridSlotState  GridSlotState);
+	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"),  Category = "Inventory")
 	EInv_ItemCategory ItemCategory;	//这页GridSlot的类型
 	
@@ -142,4 +156,18 @@ private:
 	
 	UPROPERTY()
 	TObjectPtr<UInv_HoverItem> HoverItem;
+	
+	FInv_TileParameters TileParameters;
+	FInv_TileParameters LastTileParameters;
+	
+	int32 ItemDropIndex{INDEX_NONE};
+	
+	FInv_SpaceQueryResuly CurrentQueryResult;
+	
+	
+	bool bMouseWithInCanvas{false};
+	bool bLastMouseWithInCanvas{false};
+	
+	int32 LastHighlightedIndex{INDEX_NONE};
+	FIntPoint LastHighlightedDimensions;
 };

@@ -45,3 +45,58 @@ struct FInv_SlotAvailabilityResult
 	bool bStackable{false};									//这件物品能不能堆叠
 	TArray<FInv_SlotAvailability> SlotAvailabilities;		//每个能放的格子的明细
 };
+
+
+
+UENUM(BlueprintType)
+enum class EInv_TileQuadrant : uint8
+{
+	TopLeft,
+	TopRight,
+	BottomLeft,
+	BottomRight,
+	None
+};
+
+
+
+USTRUCT(BlueprintType)
+struct FInv_TileParameters
+{
+	GENERATED_BODY()
+	
+	
+	UPROPERTY(BlueprintReadWrite , EditDefaultsOnly  , Category = "Inventory")
+	FIntPoint TileCoordinates;
+	
+	UPROPERTY(BlueprintReadWrite , EditDefaultsOnly  , Category = "Inventory")
+	int32 TileIndex{INDEX_NONE};
+	
+	UPROPERTY(BlueprintReadWrite , EditDefaultsOnly  , Category = "Inventory")
+	EInv_TileQuadrant TileQuadrant{EInv_TileQuadrant::None};
+};
+
+inline bool operator==(const FInv_TileParameters& A, const FInv_TileParameters& B)
+{
+	return A.TileCoordinates == B.TileCoordinates && A.TileIndex == B.TileIndex && A.TileQuadrant == B.TileQuadrant;
+}
+
+
+USTRUCT()
+struct FInv_SpaceQueryResuly
+{
+	GENERATED_BODY()
+
+	//如果没有其他物品则为true，有单个物品则可交换
+	bool bHasSpace{false};		
+	
+	
+	//可交换的那个item
+	TWeakObjectPtr<UInv_InventoryItem> ValidItem = nullptr;
+	
+	
+	//可交换物品的左上角索引
+	int32 UpperLeftIndex {INDEX_NONE};
+	
+	
+};
