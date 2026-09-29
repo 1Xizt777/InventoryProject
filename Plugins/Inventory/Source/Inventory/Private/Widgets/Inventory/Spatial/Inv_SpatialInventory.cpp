@@ -7,7 +7,6 @@
 #include "Components/Button.h"
 #include "Components/WidgetSwitcher.h"
 #include "InventoryManagement/Utils/Inv_InventoryStatics.h"
-#include "Items/Components/Inv_ItemComponent.h"
 #include "Widgets/Inventory/Spatial/Inv_InventoryGrid.h"
 
 void UInv_SpatialInventory::NativeOnInitialized()
@@ -62,6 +61,9 @@ void UInv_SpatialInventory::DisableButton(UButton* Button)
 
 void UInv_SpatialInventory::SetActiveGrid(UInv_InventoryGrid* InventoryGrid, UButton* Button)
 {
+	if (ActiveGrid.IsValid()) ActiveGrid->HiddenCursor();
+	ActiveGrid = InventoryGrid;
+	if (ActiveGrid.IsValid()) ActiveGrid->ShowCursor();
 	DisableButton(Button);
 	
 	Switcher->SetActiveWidget(InventoryGrid);

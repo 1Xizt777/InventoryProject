@@ -20,7 +20,7 @@ public:
 	
 	void SetImageBrush(const FSlateBrush& Brush) const;
 	
-	void UpdateStackCount(const int32 Count) const;
+	void UpdateStackCount(const int32 Count);
 	
 	int32 GetStackCount() const { return StackCount; }
 	

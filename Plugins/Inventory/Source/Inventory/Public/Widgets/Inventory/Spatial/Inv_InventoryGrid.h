@@ -34,7 +34,8 @@ public:
 	UFUNCTION()
 	void AddItem(UInv_InventoryItem* Item);
 
-
+	void ShowCursor();
+	void HiddenCursor();
 
 	FInv_SlotAvailabilityResult HasRoomForItem(const UInv_ItemComponent* ItemComponent) ;
 
@@ -100,7 +101,7 @@ private:
 	void AddStacks(const FInv_SlotAvailabilityResult& Result);
 	
 	UFUNCTION()
-	void OnSlottedItemClicked(int32  GridIndex , const FPointerEvent& MouseEvent);
+	void OnSlottedItemClicked(int32  ClickedTileIndex , const FPointerEvent& MouseEvent);
 	
 	bool IsLeftClicked(const FPointerEvent& MouseEvent) const;
 	bool IsRightClicked(const FPointerEvent& MouseEvent) const;
@@ -121,6 +122,47 @@ private:
 	void UnHighlightSlots(const int32 Index , const FIntPoint& Dimensions);
 	
 	void ChangeHoverType(const int32 Index , const FIntPoint& Dimensions , EInv_GridSlotState  GridSlotState);
+	
+	UFUNCTION()
+	void OnGridSlotClicked(int32 Index , const FPointerEvent& MouseEvent);
+	
+	UFUNCTION()
+	void OnGridSlotHovered(int32 GridIndex , const FPointerEvent& MouseEvent);
+	
+	UFUNCTION()
+	void OnGridSlotUnHovered(int32 GridIndex , const FPointerEvent& MouseEvent);
+	
+	void PutDownOnIndex(const int32 Index);
+	void ClearHoverItem();
+	
+	UUserWidget* GetVisibleCursorWidget();
+	UUserWidget* GetHiddenCursorWidget();
+	
+	
+	bool IsSameStackable(const UInv_InventoryItem* ClickedInventoryItem);
+	
+	void SwapWithHoverItem(UInv_InventoryItem* ClickedInventoryItem , const int32 GridIndex);
+	
+	bool ShouldSwapStackCount(const int32 HoverItemStackCount , const int32 RoomInClickedSlot , const int32 MaxStackCount);
+	void SwapStackCount(const int32 HoverItemStackCount , const int32 ClickedItemStackCount , const int32 ClickedTileIndex);
+	
+	bool ShouldComsumeHoverItemStacks(const int32 HoverItemStackCount , const int32 RoomInClickedSlot);
+	void ComsumeHoverItemStacks(const int32 HoverItemStackCount , const int32 ClickedItemStackCount , const int32 ClickedTileIndex);
+	
+	bool ShouldFillInStack(const int32 HoverItemStackCount , const int32 RoomInClickedSlot);
+	void FillInStack(const int32 AmountToFill , const int32 Remainder , const int32 ClickedTileIndex);
+	
+	UPROPERTY(EditAnywhere , Category = "Inventory")
+	TSubclassOf<UUserWidget> VisibleCursorWidgetClass;
+	
+	UPROPERTY(EditAnywhere , Category = "Inventory")
+	TSubclassOf<UUserWidget> HiddenCursorWidgetClass;
+	
+	UPROPERTY()
+	TObjectPtr<UUserWidget> VisibleCursorWidget;
+	
+	UPROPERTY()
+	TObjectPtr<UUserWidget> HiddenCursorWidget;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"),  Category = "Inventory")
 	EInv_ItemCategory ItemCategory;	//这页GridSlot的类型
@@ -160,6 +202,7 @@ private:
 	FInv_TileParameters TileParameters;
 	FInv_TileParameters LastTileParameters;
 	
+	//手上物品想去哪
 	int32 ItemDropIndex{INDEX_NONE};
 	
 	FInv_SpaceQueryResuly CurrentQueryResult;
