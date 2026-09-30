@@ -8,6 +8,8 @@
 #include "Items/Manifest/Inv_ItemManifest.h"
 #include "Inv_InventoryGrid.generated.h"
 
+class UInv_SpatialInventory;
+class UInv_ItemPopUp;
 class UInv_HoverItem;
 class UInv_SlottedItem;
 class UInv_ItemComponent;
@@ -29,6 +31,9 @@ class INVENTORY_API UInv_InventoryGrid : public UUserWidget
 public:
 	virtual void NativeOnInitialized() override;
 	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
+	
+	void SetOwningCanvasPanel(UCanvasPanel* CanvasPan);
+	
 	EInv_ItemCategory GetItemCategory() const { return ItemCategory; }
 	
 	UFUNCTION()
@@ -42,6 +47,7 @@ public:
 private:
 	
 	TWeakObjectPtr<UInv_InventoryComponent> InventoryComponent;
+	TWeakObjectPtr<UCanvasPanel> OwningCanvasPanel; 
 	
 	void ConstructGrid();
 	
@@ -151,6 +157,25 @@ private:
 	
 	bool ShouldFillInStack(const int32 HoverItemStackCount , const int32 RoomInClickedSlot);
 	void FillInStack(const int32 AmountToFill , const int32 Remainder , const int32 ClickedTileIndex);
+	
+	void CreateItemPopUp(const int32 ClickedTileIndex);
+	
+	
+	UFUNCTION()
+	void OnPopMenuSplit(int32 SplitAmount , int32 GridIndex);
+	
+	UFUNCTION()
+	void OnPopMenuDrop(int32 GridIndex);
+	
+	UFUNCTION()
+	void OnPopMenuConsume(int32 GridIndex);
+	
+	
+	UPROPERTY(EditDefaultsOnly , Category = "Inventory")
+	TSubclassOf<UInv_ItemPopUp> ItemPopUpClass;
+	
+	UPROPERTY()
+	TObjectPtr<UInv_ItemPopUp> ItemPopUp;
 	
 	UPROPERTY(EditAnywhere , Category = "Inventory")
 	TSubclassOf<UUserWidget> VisibleCursorWidgetClass;

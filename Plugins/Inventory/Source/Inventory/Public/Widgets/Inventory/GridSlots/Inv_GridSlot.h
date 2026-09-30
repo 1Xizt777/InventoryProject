@@ -4,6 +4,7 @@
 #include "Blueprint/UserWidget.h"
 #include "Inv_GridSlot.generated.h"
 
+class UInv_ItemPopUp;
 class UInv_InventoryItem;
 
 
@@ -49,6 +50,9 @@ public:
 	bool IsAvailable() const { return bAvailable; }
 	void SetAvailable(bool bIsAvailable) { bAvailable = bIsAvailable; }
 	
+	UInv_ItemPopUp* GetItemPopUp() const;
+	void SetItemPopUp(UInv_ItemPopUp* ItemPop);
+	
 	
 	void SetUnoccupiedTexture();
 	void SetOccupiedTexture();
@@ -68,7 +72,9 @@ private:
 	int32 StackCount{0};
 	
 	int32 UpperLeftIndex = {INDEX_NONE};
+	
 	TWeakObjectPtr<UInv_InventoryItem> InventoryItem;
+	TWeakObjectPtr<UInv_ItemPopUp> ItemPopUp;
 	
 	//默认是可用的
 	bool bAvailable{true};
@@ -91,4 +97,6 @@ private:
 	
 	EInv_GridSlotState GridSlotState;
 	
+	UFUNCTION()
+	void OnItemPopDestruct(UUserWidget* Menu);
 };

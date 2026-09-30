@@ -2,6 +2,7 @@
 #include "Widgets/Inventory/GridSlots/Inv_GridSlot.h"
 #include "Items/Inv_InventoryItem.h"  
 #include "Components/Image.h"
+#include "Widgets/ItemPopUp/Inv_ItemPopUp.h"	//SetItemPopUp需要完整类型（TWeakObjectPtr赋值要隐式转UObject*）
 
 void UInv_GridSlot::NativeOnMouseEnter(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
 {
@@ -29,6 +30,18 @@ void UInv_GridSlot::SetInventoryItem(UInv_InventoryItem* Item)
 	InventoryItem = Item;
 }
 
+UInv_ItemPopUp* UInv_GridSlot::GetItemPopUp() const
+{
+	return ItemPopUp.Get();
+}
+
+void UInv_GridSlot::SetItemPopUp(UInv_ItemPopUp* ItemPop)
+{
+	ItemPopUp = ItemPop;
+	ItemPop->SetGridIndex(GetTileIndex());
+	ItemPop->OnNativeDestruct.AddUObject(this, &ThisClass::OnItemPopDestruct);
+}
+
 void UInv_GridSlot::SetUnoccupiedTexture()
 {
 	GridSlotState = EInv_GridSlotState::Unoccupied;
@@ -52,6 +65,11 @@ void UInv_GridSlot::SetGrayedOutTexture()
 {
 	GridSlotState = EInv_GridSlotState::GrayedOut;
 	Image_GridSlot->SetBrush(Brush_GrayedOut);
+}
+
+void UInv_GridSlot::OnItemPopDestruct(UUserWidget* Menu)
+{
+	ItemPopUp.Reset();
 }
 
 
