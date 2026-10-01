@@ -416,6 +416,7 @@ void UInv_InventoryGrid::CreateItemPopUp(const int32 ClickedTileIndex)
 
 
 
+
 bool UInv_InventoryGrid::IsSameStackable(const UInv_InventoryItem* ClickedInventoryItem)
 {
 	if (!IsValid(HoverItem) || !IsValid(ClickedInventoryItem)) return false;	//右键点击时HoverItem可能为空
@@ -1081,7 +1082,7 @@ void UInv_InventoryGrid::OnPopMenuSplit(int32 SplitAmount, int32 GridIndex)
 	if (!IsValid(RightClickedItem)) return;
 	if (!RightClickedItem->IsStackable()) return;
 
-	const int32 UpperLeftIndex = GridSlots[GridIndex]->GetUpperLeftIndex();
+	const int32 UpperLeftIndex = GridSlots[GridIndex]->GetUpperLeftIndex();		//仅有左上角那个记数量
 	
 	UInv_GridSlot* UpperLeftGridSlot = GridSlots[UpperLeftIndex];
 	UInv_SlottedItem* UpperLeftSlottedItem = SlottedItems.FindChecked(UpperLeftIndex);
@@ -1089,8 +1090,8 @@ void UInv_InventoryGrid::OnPopMenuSplit(int32 SplitAmount, int32 GridIndex)
 	
 	
 	const int32 NewStackCount = UpperLeftGridSlot->GetStackCount()-SplitAmount;
-	UpperLeftGridSlot->SetStackCount(NewStackCount);
-	UpperLeftSlottedItem->UpdateStackCount(NewStackCount);
+	UpperLeftGridSlot->SetStackCount(NewStackCount);	//更新数量
+	UpperLeftSlottedItem->UpdateStackCount(NewStackCount);	//UI更新数量
 	
 	AssignHoverItem(RightClickedItem , UpperLeftIndex , UpperLeftIndex);
 	HoverItem->UpdateStackCount(SplitAmount);
@@ -1098,7 +1099,24 @@ void UInv_InventoryGrid::OnPopMenuSplit(int32 SplitAmount, int32 GridIndex)
 
 void UInv_InventoryGrid::OnPopMenuDrop(int32 GridIndex)
 {
+	UInv_InventoryItem* RightClickedItem = GridSlots[GridIndex]->GetInventoryItem().Get();
+	if (!IsValid(RightClickedItem)) return;
+	
+	PickUp(RightClickedItem , GridIndex);	//PickUp里将要丢下的物品创建为HoverItem了
+	DropItem();
 }
+void UInv_InventoryGrid::DropItem()
+{
+	if (!IsValid(HoverItem)) return;
+	if (!IsValid(HoverItem->GetInventoryItem())) return;
+	
+	//告诉服务器丢下
+	InventoryComponent->Server_DropItem(HoverItem->GetInventoryItem() , HoverItem->GetStackCount());
+	
+	ClearHoverItem();
+	ShowCursor();
+}
+
 
 void UInv_InventoryGrid::OnPopMenuConsume(int32 GridIndex)
 {

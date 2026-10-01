@@ -45,7 +45,10 @@ public:
 	
 	void AddRepSubObj(UObject* SubObj);
 	
+	UFUNCTION(Server , Reliable)
+	void Server_DropItem(UInv_InventoryItem* Item , int32 StackCount);
 	
+	void SpawnDroppedItem(UInv_InventoryItem* Item , int32 StackCount);
 	
 protected:
 
@@ -71,4 +74,19 @@ private:
 	
 	void OpenInventoryMenu();
 	void CloseInventoryMenu();
+	
+	UPROPERTY(EditDefaultsOnly , Category="Inventory|SpawnParams")
+	float DropSpawnAngleMin = -85.f;
+	
+	UPROPERTY(EditDefaultsOnly , Category="Inventory|SpawnParams")
+	float DropSpawnAngleMax = 85.f;
+
+	UPROPERTY(EditDefaultsOnly , Category="Inventory|SpawnParams")
+	float DropSpawnDistanceMin = 50.f;
+	
+	UPROPERTY(EditDefaultsOnly , Category="Inventory|SpawnParams")
+	float DropSpawnDistanceMax = 125.f;
+	
+	UPROPERTY(EditDefaultsOnly , Category="Inventory|SpawnParams")
+	float RelativeSpawnElevation = -90.f;
 };

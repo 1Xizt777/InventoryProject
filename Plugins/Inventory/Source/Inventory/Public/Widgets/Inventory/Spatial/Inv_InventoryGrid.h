@@ -39,6 +39,8 @@ public:
 	UFUNCTION()
 	void AddItem(UInv_InventoryItem* Item);
 
+	void DropItem();
+	
 	void ShowCursor();
 	void HiddenCursor();
 
@@ -160,6 +162,7 @@ private:
 	
 	void CreateItemPopUp(const int32 ClickedTileIndex);
 	
+
 	
 	UFUNCTION()
 	void OnPopMenuSplit(int32 SplitAmount , int32 GridIndex);

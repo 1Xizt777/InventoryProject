@@ -106,6 +106,50 @@ void UInv_InventoryComponent::AddRepSubObj(UObject* SubObj)
 	}
 }
 
+void UInv_InventoryComponent::Server_DropItem_Implementation(UInv_InventoryItem* Item, int32 StackCount)
+{
+	const int32 NewStackCount = Item->GetTotalStackCount() - StackCount;
+	
+	if (NewStackCount <= 0)		//是不是全丢了
+	{
+		InventoryList.RemoveEntry(Item);
+	}
+	else
+	{
+		Item->SetTotalStackCount(NewStackCount);
+	}
+	
+	SpawnDroppedItem(Item ,StackCount);
+}
+
+void UInv_InventoryComponent::SpawnDroppedItem(UInv_InventoryItem* Item, int32 StackCount)
+{
+	if (!OwningController.IsValid()) return;
+	
+	const APawn* OwningPawn = OwningController->GetPawn();
+	if (!IsValid(OwningPawn)) return;
+	
+	//处理SpawnLocation
+	FVector RotatedForward = OwningPawn->GetActorForwardVector();
+	RotatedForward = RotatedForward.RotateAngleAxis(FMath::RandRange(DropSpawnAngleMin , DropSpawnAngleMax), FVector::UpVector);
+	FVector SpawnLocation = OwningPawn->GetActorLocation() + RotatedForward * FMath::RandRange(DropSpawnDistanceMin, DropSpawnDistanceMax);
+	SpawnLocation.Z += RelativeSpawnElevation;
+	
+	
+	//处理SpawnRotation
+	const FRotator SpawnRotation = FRotator::ZeroRotator;
+	
+	
+	FInv_ItemManifest& ItemManifest = Item->GetItemManifestMutable();
+	if (FInv_StackableFragment* StackableFragment = ItemManifest.GetFragmentOfTypeMutable<FInv_StackableFragment>())
+	{
+		StackableFragment->SetStackCount(StackCount);
+	}
+	
+	ItemManifest.SpawnPickUpActor(this , SpawnLocation, SpawnRotation);
+	
+}
+
 void UInv_InventoryComponent::BeginPlay()
 {
 	Super::BeginPlay();
@@ -115,7 +159,8 @@ void UInv_InventoryComponent::BeginPlay()
 
 void UInv_InventoryComponent::ConstructInventory()
 {
-	OwningController = Cast<APlayerController>(GetOwner());
+	OwningController = Cast<APlayerController>(GetOwner());	//给OwningController赋值
+	
 	checkf(OwningController.IsValid(), TEXT("请确保Inv_InventoryComponent是挂载在PlayerController身上的！"));
 	
 	if (!OwningController->IsLocalController()) return;
