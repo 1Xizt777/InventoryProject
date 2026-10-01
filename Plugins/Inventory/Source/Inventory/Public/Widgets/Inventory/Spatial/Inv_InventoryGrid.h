@@ -41,11 +41,15 @@ public:
 
 	void DropItem();
 	
+	bool HasHoverItem() const;
+	
 	void ShowCursor();
 	void HiddenCursor();
 
 	FInv_SlotAvailabilityResult HasRoomForItem(const UInv_ItemComponent* ItemComponent) ;
 
+	
+	
 private:
 	
 	TWeakObjectPtr<UInv_InventoryComponent> InventoryComponent;

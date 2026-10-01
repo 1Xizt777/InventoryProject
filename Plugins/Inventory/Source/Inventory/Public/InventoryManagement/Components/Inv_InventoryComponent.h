@@ -53,6 +53,7 @@ public:
 	
 	void SpawnDroppedItem(UInv_InventoryItem* Item , int32 StackCount);
 	
+	UInv_InventoryBase* GetInventoryMenu()const;
 protected:
 
 	virtual void BeginPlay() override;

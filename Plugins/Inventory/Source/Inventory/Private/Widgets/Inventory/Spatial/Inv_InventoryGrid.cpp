@@ -300,6 +300,8 @@ EInv_TileQuadrant UInv_InventoryGrid::CalculateTileQuadrant(const FVector2D Canv
 
 void UInv_InventoryGrid::OnSlottedItemClicked(int32 ClickedTileIndex, const FPointerEvent& MouseEvent)
 {
+	UInv_InventoryStatics::ItemUnhovered(GetOwningPlayer());
+	
 	check(GridSlots.IsValidIndex(ClickedTileIndex));
 	UInv_InventoryItem* ClickInventoryItem = GridSlots[ClickedTileIndex]->GetInventoryItem().Get();
 	
@@ -1115,6 +1117,11 @@ void UInv_InventoryGrid::DropItem()
 	
 	ClearHoverItem();
 	ShowCursor();
+}
+
+bool UInv_InventoryGrid::HasHoverItem() const
+{
+	return IsValid(HoverItem);
 }
 
 

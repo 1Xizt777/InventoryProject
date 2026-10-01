@@ -38,3 +38,36 @@ FIntPoint UInv_WidgetUtils::GetPositionFromIndex(const int32 Index, const int32 
 {
 	return FIntPoint(Index % Columns, Index / Columns);		//（列 ，行）
 }
+
+FVector2D UInv_WidgetUtils::GetClampedWidgetPosition(const FVector2D& Boundary, const FVector2D& WidgetSize,const FVector2D& MousePos)
+{
+	FVector2D ClampedWidgetPosition = MousePos;
+	
+	if (MousePos.X + WidgetSize.X > Boundary.X)
+	{
+		ClampedWidgetPosition.X = Boundary.X - WidgetSize.X;	
+		/*
+		 *坐标系里 X 是控件的左边缘位置，WidgetSize.X 是宽度，所以：
+		 *	1.     控件右边缘 = X + WidgetSize.X
+		 *	2.     边界右边缘 = Boundary.X
+		 *要求"控件完全待在边界内" → 右边缘 ≤ Boundary.X，即：
+		 *	3.     X ≤ Boundary.X - WidgetSize.X
+		*/		
+	}
+	if (MousePos.X < 0.f)
+	{
+		ClampedWidgetPosition.X = 0.f;
+	}
+	
+	
+	if (MousePos.Y + WidgetSize.Y > Boundary.Y)
+	{
+		ClampedWidgetPosition.Y = Boundary.Y - WidgetSize.Y;
+	}
+	if (MousePos.Y < 0.f)
+	{
+		ClampedWidgetPosition.Y = 0.f;
+	}
+	
+	return ClampedWidgetPosition;
+}

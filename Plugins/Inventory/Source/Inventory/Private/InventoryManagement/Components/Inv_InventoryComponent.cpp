@@ -172,6 +172,11 @@ void UInv_InventoryComponent::SpawnDroppedItem(UInv_InventoryItem* Item, int32 S
 	
 }
 
+UInv_InventoryBase* UInv_InventoryComponent::GetInventoryMenu() const
+{
+	return InventoryMenu;
+}
+
 void UInv_InventoryComponent::BeginPlay()
 {
 	Super::BeginPlay();
