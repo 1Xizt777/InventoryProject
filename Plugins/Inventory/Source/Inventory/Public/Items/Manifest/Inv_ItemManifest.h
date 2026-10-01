@@ -1,4 +1,5 @@
-﻿#pragma once
+﻿
+#pragma once
 
 #include "CoreMinimal.h"
 #include "GameplayTagContainer.h"
@@ -35,6 +36,8 @@ public:
 	requires std::derived_from<T, FInv_ItemFragment>	//传入的T 只能是FInv_ItemFragment的派生
 	T* GetFragmentOfTypeMutable();
 	
+	void SpawnPickUpActor(const UObject* WorldContextObject, const FVector& SpawnLocation , const FRotator& SpawnRotation);
+	
 private:
 	
 	UPROPERTY(EditDefaultsOnly, Category = "Inventory" , meta = (ExcludeBaseStruct))//排除父类结构体（不能选父类结构体）
@@ -48,6 +51,9 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Inventory")
 	FGameplayTag ItemType;
 
+	
+	UPROPERTY(EditDefaultsOnly , Category = "Inventory")
+	TSubclassOf<AActor> PickUpActorClass;
 };
 
 template <typename T> 
