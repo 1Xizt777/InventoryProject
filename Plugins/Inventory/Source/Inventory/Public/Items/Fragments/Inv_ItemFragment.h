@@ -2,10 +2,9 @@
 
 #include "CoreMinimal.h"
 #include "GameplayTagContainer.h"
-#include "RHITransientResourceAllocator.h"
-
 #include "Inv_ItemFragment.generated.h"
 
+class APlayerController;
 
 USTRUCT(BlueprintType)
 struct FInv_ItemFragment
@@ -30,7 +29,7 @@ struct FInv_ItemFragment
 	
 private:
 
-	UPROPERTY(EditAnywhere, Category = "Inventory")
+	UPROPERTY(EditAnywhere, Category = "Inventory" , meta=(Categories = "FragmentTags"))
 	FGameplayTag FragmentTag = FGameplayTag::EmptyTag;
 };
 
@@ -102,4 +101,38 @@ private:
 	//拾取一次给几个
 	UPROPERTY(EditDefaultsOnly, Category = "Inventory")
 	int32 StackCount{1};	
+};
+
+
+USTRUCT(BlueprintType)
+struct FInv_ConsumableFragment : public FInv_ItemFragment
+{
+	GENERATED_BODY()
+public:
+	
+	virtual void OnConsume(APlayerController* PC){};
+};
+
+
+USTRUCT(BlueprintType)
+struct FInv_HealthPotionFragment : public FInv_ConsumableFragment
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditDefaultsOnly , Category = "Inventory")
+	float HealthAmount = 25.f;
+	
+	virtual void OnConsume(APlayerController* PC) override;
+};
+
+
+USTRUCT(BlueprintType)
+struct FInv_ManaPotionFragment : public FInv_ConsumableFragment
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditDefaultsOnly , Category = "Inventory")
+	float ManaAmount = 50.f;
+	
+	virtual void OnConsume(APlayerController* PC) override;
 };
