@@ -20,7 +20,7 @@ public:
 	
 	void InitialMainfest(FInv_ItemManifest CopyOfManifest);
 	
-	FInv_ItemManifest GetItemManifest() const {return ItemManifest;}
+	FInv_ItemManifest GetItemManifest() const {return ItemManifest;}		// 按值返回！
 	FInv_ItemManifest& GetItemManifestMutable() {return ItemManifest;}
 	
 	FString GetPickupMessage() const { return PickupMessage; }

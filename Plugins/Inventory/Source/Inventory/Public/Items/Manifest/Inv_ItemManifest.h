@@ -3,10 +3,12 @@
 
 #include "CoreMinimal.h"
 #include "GameplayTagContainer.h"
+#include "Items/Fragments/Inv_ItemFragment.h"
 #include "Types/Inv_GridTypes.h"
 #include "StructUtils/InstancedStruct.h"
 #include "Inv_ItemManifest.generated.h"
 
+class UInv_CompositeBase;
 struct FInv_ItemFragment;
 enum class EInv_ItemCategory : uint8;
 
@@ -17,12 +19,15 @@ struct INVENTORY_API FInv_ItemManifest
 
 public:
 	
+	TArray<TInstancedStruct<FInv_ItemFragment>>& GetFragmentsMutable() {return Fragments;};
+	
 	UInv_InventoryItem* Manifest(UObject* NewOuter);
 	
 	EInv_ItemCategory GetItemCategory() const { return ItemCategory; }
 	
 	FGameplayTag GetItemType() const { return ItemType; }
 	
+	void AssimilateInventoryFragments(UInv_CompositeBase* Composite) const;
 	
 	template<typename T>
 	requires std::derived_from<T, FInv_ItemFragment>	//传入的T 只能是FInv_ItemFragment的派生
@@ -35,6 +40,11 @@ public:
 	template<typename T>
 	requires std::derived_from<T, FInv_ItemFragment>	//传入的T 只能是FInv_ItemFragment的派生
 	T* GetFragmentOfTypeMutable();
+	
+	template<typename T>
+	requires std::derived_from<T, FInv_ItemFragment>	//传入的T 只能是FInv_ItemFragment的派生
+	TArray<const T*> GetAllFragmentsOfType() const;
+	
 	
 	void SpawnPickUpActor(const UObject* WorldContextObject, const FVector& SpawnLocation , const FRotator& SpawnRotation);
 	
@@ -54,6 +64,8 @@ private:
 	
 	UPROPERTY(EditDefaultsOnly , Category = "Inventory")
 	TSubclassOf<AActor> PickUpActorClass;
+	
+	void ClearFragments();
 };
 
 template <typename T> 
@@ -100,6 +112,22 @@ T* FInv_ItemManifest::GetFragmentOfTypeMutable()
 		}
 	}
 	return nullptr;
+}
+
+
+//用类型获取相应的结构体数组
+template <typename T> requires std::derived_from<T, FInv_ItemFragment>
+TArray<const T*> FInv_ItemManifest::GetAllFragmentsOfType() const
+{
+	TArray<const T*> Result;
+	for (const auto& Fragment : Fragments)
+	{
+		if (const T* FragmentPtr = Fragment.GetPtr<T>())
+		{
+			Result.Add(FragmentPtr);
+		}
+	}
+	return Result;
 }
 
 

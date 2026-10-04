@@ -56,6 +56,7 @@ UInv_InventoryItem* FInv_InventoryFastArray::AddEntry(UInv_ItemComponent* ItemCo
 	if (!IsValid(IC)) return nullptr;
 	
 	FInv_InventoryEntry& NewEntry = Entries.AddDefaulted_GetRef();			//在数组末尾加一个默认构造的元素,返回引用
+	
 	NewEntry.Item = ItemComponent->GetItemManifest().Manifest(OwningActor);		//归OwningActor管（这一行New了Item出来）
 	
 	IC->AddRepSubObj(NewEntry.Item);		//注册成复制子对象

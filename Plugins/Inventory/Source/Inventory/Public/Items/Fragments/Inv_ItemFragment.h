@@ -4,6 +4,7 @@
 #include "GameplayTagContainer.h"
 #include "Inv_ItemFragment.generated.h"
 
+class UInv_CompositeBase;
 class APlayerController;
 
 USTRUCT(BlueprintType)
@@ -27,11 +28,41 @@ struct FInv_ItemFragment
 	FGameplayTag GetFragmentTag() const { return FragmentTag; }
 	void SetFragmentTag(FGameplayTag Tag) { FragmentTag = Tag; }
 	
+	virtual void Manifest() {}	//Fragment的Manifest，注意区分FInv_Manifest的Mainfest
+	
 private:
 
 	UPROPERTY(EditAnywhere, Category = "Inventory" , meta=(Categories = "FragmentTags"))
 	FGameplayTag FragmentTag = FGameplayTag::EmptyTag;
 };
+
+
+
+
+
+
+
+//此结构体‘FInv_InventoryItemFragment’用于集成到小部件上
+class UInv_CompositeBase;
+USTRUCT(BlueprintType)
+struct FInv_InventoryItemFragment : public FInv_ItemFragment
+{
+	GENERATED_BODY()
+	
+public:
+	
+	virtual void Assimilate(UInv_CompositeBase* Composite) const;
+	
+protected:
+	
+	bool MatchesWidgetTag(const UInv_CompositeBase* Composite) const;
+	
+};
+
+
+
+
+
 
 USTRUCT(BlueprintType)
 struct FInv_GridFragment : public FInv_ItemFragment
@@ -56,14 +87,20 @@ private:
 };
 
 
+
+
+
+
+
 USTRUCT(BlueprintType)
-struct FInv_ImageFragment : public FInv_ItemFragment
+struct FInv_ImageFragment : public FInv_InventoryItemFragment
 {
 	GENERATED_BODY()
 	
 public:
 	
 	UTexture2D* GetIcon() const { return Icon; }
+	virtual void Assimilate(UInv_CompositeBase* Composite) const;
 	
 private:
 	
@@ -73,8 +110,78 @@ private:
 	
 	//图标大小
 	UPROPERTY(EditAnywhere, Category = "Inventory")
-	FVector2D IconDimension{44.f,44.f};
+	FVector2D IconDimensions{44.f,44.f};
 };
+
+USTRUCT(BlueprintType)
+struct FInv_TextFragment : public FInv_InventoryItemFragment
+{
+	GENERATED_BODY()
+	
+public:
+	void SetText(const FText& Text) {FragmentText = Text;};
+	FText GetText() const { return FragmentText; }
+	
+	virtual void Assimilate(UInv_CompositeBase* Composite) const;
+	
+private:
+	
+	UPROPERTY(EditAnywhere , Category = "Inventory")
+	FText FragmentText;
+};
+
+USTRUCT(BlueprintType)
+struct FInv_LabelNumebrFragment : public FInv_InventoryItemFragment
+{
+	GENERATED_BODY()
+	
+public:
+	
+	virtual void Manifest() override;	//随机Value出来
+	
+	virtual void Assimilate(UInv_CompositeBase* Composite) const override;
+	
+	//仅第一次生成物品的时候会随机Value，随后保持一个值
+	bool bRandomizeOnManifest{true};
+	
+	float GetValue() const { return Value; }
+private:
+	
+	
+	
+	UPROPERTY(EditAnywhere, Category = "Inventory")
+	FText Text_Label;
+	
+	UPROPERTY(VisibleAnywhere, Category = "Inventory")
+	float Value{0.f};
+	
+	UPROPERTY(EditAnywhere, Category = "Inventory")
+	float MaxValue{0.f};
+	
+	UPROPERTY(EditAnywhere, Category = "Inventory")
+	float MinValue{0.f};
+	
+	
+	UPROPERTY(EditAnywhere, Category = "Inventory")
+	bool bCollapseLabel{false};
+	
+	UPROPERTY(EditAnywhere, Category = "Inventory")
+	bool bCollapseValue{false};
+	
+	UPROPERTY(EditAnywhere, Category = "Inventory")
+	int32 MinFractionalDigits{1};
+	
+	UPROPERTY(EditAnywhere, Category = "Inventory")
+	int32 MaxFractionalDigits{1};
+};
+
+
+
+
+
+
+
+
 
 
 
@@ -104,35 +211,60 @@ private:
 };
 
 
+
+
+
+
+
+
 USTRUCT(BlueprintType)
-struct FInv_ConsumableFragment : public FInv_ItemFragment
+struct FInv_ConsumeModifier : public FInv_LabelNumebrFragment
 {
 	GENERATED_BODY()
-public:
 	
-	virtual void OnConsume(APlayerController* PC){};
+	virtual void OnConsume(APlayerController* PC) {}
+
 };
 
 
+
 USTRUCT(BlueprintType)
-struct FInv_HealthPotionFragment : public FInv_ConsumableFragment
+struct FInv_ConsumableFragment : public FInv_InventoryItemFragment
 {
 	GENERATED_BODY()
 
-	UPROPERTY(EditDefaultsOnly , Category = "Inventory")
-	float HealthAmount = 25.f;
+	virtual void OnConsume(APlayerController* PC);	
+	
+	virtual void Assimilate(UInv_CompositeBase* Composite) const;
+	
+	virtual void Manifest() override;
+	
+private:
+
+	UPROPERTY(EditDefaultsOnly, Category = "Inventory" , meta =(ExcludeBaseStruct))	
+	TArray<TInstancedStruct<FInv_ConsumeModifier>> ConsumeModifiers;
+	
+};
+
+
+
+
+
+USTRUCT(BlueprintType)
+struct FInv_HealthPotionFragment : public FInv_ConsumeModifier
+{
+	GENERATED_BODY()
+	
 	
 	virtual void OnConsume(APlayerController* PC) override;
 };
 
 
 USTRUCT(BlueprintType)
-struct FInv_ManaPotionFragment : public FInv_ConsumableFragment
+struct FInv_ManaPotionFragment : public FInv_ConsumeModifier
 {
 	GENERATED_BODY()
 
-	UPROPERTY(EditDefaultsOnly , Category = "Inventory")
-	float ManaAmount = 50.f;
 	
 	virtual void OnConsume(APlayerController* PC) override;
 };

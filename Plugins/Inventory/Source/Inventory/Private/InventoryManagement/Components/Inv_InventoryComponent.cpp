@@ -135,6 +135,7 @@ void UInv_InventoryComponent::Server_ConsumeItem_Implementation(UInv_InventoryIt
 		Item->SetTotalStackCount(NewStackCount);
 	}
 	
+	//消耗物品
 	if (FInv_ConsumableFragment* ConsumableFragment = Item->GetItemManifestMutable().GetFragmentOfTypeMutable<FInv_ConsumableFragment>())
 	{
 		ConsumableFragment->OnConsume(OwningController.Get());
