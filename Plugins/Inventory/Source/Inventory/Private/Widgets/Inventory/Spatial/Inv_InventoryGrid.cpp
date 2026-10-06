@@ -25,7 +25,8 @@ void UInv_InventoryGrid::NativeOnInitialized()
 	
 	InventoryComponent = UInv_InventoryStatics::GetInventoryComponent(GetOwningPlayer());
 	InventoryComponent->OnItemAdded.AddDynamic(this , &ThisClass::AddItem);
-	InventoryComponent->OnStackChanged.AddDynamic(this , &ThisClass::AddStacks);	
+	InventoryComponent->OnStackChanged.AddDynamic(this , &ThisClass::AddStacks);
+	InventoryComponent->OnInventoryMenuToggled.AddDynamic(this , &UInv_InventoryGrid::OnInventoryMenuToggled);
 }
 
 void UInv_InventoryGrid::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
@@ -670,13 +671,13 @@ FInv_SlotAvailabilityResult UInv_InventoryGrid::HasRoomForItem(const UInv_ItemCo
 }
 
 
-FInv_SlotAvailabilityResult UInv_InventoryGrid::HasRoomForItem(const UInv_InventoryItem* Item)
+FInv_SlotAvailabilityResult UInv_InventoryGrid::HasRoomForItem(const UInv_InventoryItem* Item , const int32 StackAmountOverride)
 {
-	return HasRoomForItem(Item->GetItemManifest());
+	return HasRoomForItem(Item->GetItemManifest(),StackAmountOverride);
 }
 
 
-FInv_SlotAvailabilityResult UInv_InventoryGrid::HasRoomForItem(const FInv_ItemManifest& Manifest)
+FInv_SlotAvailabilityResult UInv_InventoryGrid::HasRoomForItem(const FInv_ItemManifest& Manifest , const int32 StackAmountOverride)
 {
 	FInv_SlotAvailabilityResult Result;
 	
@@ -687,6 +688,10 @@ FInv_SlotAvailabilityResult UInv_InventoryGrid::HasRoomForItem(const FInv_ItemMa
 	// Determine how many stacks to add.
 	const int32 MaxStackSize =  Result.bStackable ? StackableFragment->GetMaxStackSize() : 1;	//单个能叠多少个
 	int32 AmountToFill = Result.bStackable ? StackableFragment->GetStackCount() : 1;		//拾取一次有几个	
+	if (StackAmountOverride != -1 && Result.bStackable)
+	{
+		AmountToFill = StackAmountOverride;
+	}
 	
 	
 	TSet<int32> CheckedIndices;	//本次已确定要占的格子
@@ -887,6 +892,12 @@ void UInv_InventoryGrid::AssignHoverItem(UInv_InventoryItem* InventoryItem)
 	
 	GetOwningPlayer()->SetMouseCursorWidget(EMouseCursor::Default , HoverItem);
 }
+
+void UInv_InventoryGrid::OnHide()
+{
+	PutHoverItemBack();
+}
+
 void UInv_InventoryGrid::RemoveItemFromGrid(UInv_InventoryItem* InventoryItem, const int32 GridIndex)
 {
 	const FInv_GridFragment* GridFragment = GetFragment<FInv_GridFragment>(InventoryItem, FragmentTags::GridFragment);
@@ -1124,6 +1135,11 @@ bool UInv_InventoryGrid::HasHoverItem() const
 	return IsValid(HoverItem);
 }
 
+UInv_HoverItem* UInv_InventoryGrid::GetHoverItem() const
+{
+	return HoverItem;
+}
+
 
 void UInv_InventoryGrid::OnPopMenuConsume(int32 GridIndex)
 {
@@ -1150,6 +1166,24 @@ void UInv_InventoryGrid::OnPopMenuConsume(int32 GridIndex)
 	}
 	
 	
+}
+
+void UInv_InventoryGrid::PutHoverItemBack()
+{
+	if (!IsValid(HoverItem) ||  !IsValid(HoverItem->GetInventoryItem())) return;
+	
+	FInv_SlotAvailabilityResult Result = HasRoomForItem(HoverItem->GetInventoryItem() , HoverItem->GetStackCount());
+	
+	AddStacks(Result);
+	ClearHoverItem();
+}
+
+void UInv_InventoryGrid::OnInventoryMenuToggled(bool bOpen)
+{
+	if (!bOpen)
+	{
+		PutHoverItemBack();
+	}
 }
 
 bool UInv_InventoryGrid::MatchesCategory(const UInv_InventoryItem* Item) const

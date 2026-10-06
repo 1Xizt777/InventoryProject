@@ -82,7 +82,7 @@ void FInv_ConsumableFragment::OnConsume(APlayerController* PC)
 {
 	for (auto& Modifier : ConsumeModifiers)
 	{
-		auto& ModifierRef = Modifier.GetMutable<>();
+		auto& ModifierRef = Modifier.GetMutable();
 		ModifierRef.OnConsume(PC);
 	}
 }
@@ -103,15 +103,43 @@ void FInv_ConsumableFragment::Manifest()
 {
 	for (auto& Modifier : ConsumeModifiers)
 	{
-		auto& ModifierRef = Modifier.GetMutable<>();
+		auto& ModifierRef = Modifier.GetMutable();
 		ModifierRef.Manifest();
 	}
 }
 
 
+void FInv_EquipmentFragment::OnEquip(APlayerController* PC)
+{
+	if (bEquipped) return;
+	bEquipped = true;
+	for (auto& Modifier : EquipModifiers)
+	{
+		auto& ModifierRef = Modifier.GetMutable();
+		ModifierRef.OnEquip(PC);
+	}
+}
 
+void FInv_EquipmentFragment::OnUnEquip(APlayerController* PC)
+{
+	if (!bEquipped) return;
+	bEquipped = false;
+	for (auto& Modifier : EquipModifiers)
+	{
+		auto& ModifierRef = Modifier.GetMutable();
+		ModifierRef.OnUnEquip(PC);
+	}
+}
 
-
+void FInv_EquipmentFragment::Assimilate(UInv_CompositeBase* Composite) const
+{
+	FInv_InventoryItemFragment::Assimilate(Composite);
+	for (const auto& Modifier : EquipModifiers)
+	{
+		const auto& ModifierRef = Modifier.Get();
+		ModifierRef.Assimilate(Composite);
+	}
+}
 
 
 void FInv_HealthPotionFragment::OnConsume(APlayerController* PC)
@@ -122,5 +150,17 @@ void FInv_HealthPotionFragment::OnConsume(APlayerController* PC)
 void FInv_ManaPotionFragment::OnConsume(APlayerController* PC)
 {
 	GEngine->AddOnScreenDebugMessage(-1,3.f,FColor::Blue , FString::Printf(TEXT("Consume Successfully : %f"),GetValue()));
+}
+
+
+
+void FInv_StrengthModifier::OnEquip(APlayerController* PC)
+{
+	GEngine->AddOnScreenDebugMessage(-1,3.f,FColor::Orange , FString::Printf(TEXT("Equip Successfully , Strength Increased : %f"),GetValue()));
+}
+
+void FInv_StrengthModifier::OnUnEquip(APlayerController* PC)
+{
+	GEngine->AddOnScreenDebugMessage(-1,3.f,FColor::Orange , FString::Printf(TEXT("Unequip Successfully , Strength Decreased : %f"),GetValue()));
 }
 ;

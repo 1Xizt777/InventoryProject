@@ -46,3 +46,24 @@ void UInv_InventoryStatics::ItemUnhovered(APlayerController* PC)
 	
 	InventoryBase->OnItemUnhovered();	//实际上就是调用Inv_SpatialInventory的 OnItemUnhovered
 }
+
+UInv_HoverItem* UInv_InventoryStatics::GetHoverItem(APlayerController* PC)
+{
+	UInv_InventoryComponent* InventoryComponent = GetInventoryComponent(PC);
+	if (!IsValid(InventoryComponent)) return nullptr;
+	
+	UInv_InventoryBase* InventoryBase = InventoryComponent->GetInventoryMenu();
+	if (!IsValid(InventoryBase)) return nullptr;
+	
+	return InventoryBase->GetHoverItem();
+	
+}
+
+UInv_InventoryBase* UInv_InventoryStatics::GetInvntoryWidget(APlayerController* PC)
+{
+	UInv_InventoryComponent* InventoryComponent = GetInventoryComponent(PC);
+	if (!IsValid(InventoryComponent)) return nullptr;
+	
+	return InventoryComponent->GetInventoryMenu();
+}
+

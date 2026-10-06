@@ -32,6 +32,8 @@ public:
 	virtual void NativeOnInitialized() override;
 	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
 	
+	void ClearHoverItem();
+	
 	void SetOwningCanvasPanel(UCanvasPanel* CanvasPan);
 	
 	EInv_ItemCategory GetItemCategory() const { return ItemCategory; }
@@ -42,13 +44,18 @@ public:
 	void DropItem();
 	
 	bool HasHoverItem() const;
+	UInv_HoverItem* GetHoverItem() const;
 	
 	void ShowCursor();
 	void HiddenCursor();
 
 	FInv_SlotAvailabilityResult HasRoomForItem(const UInv_ItemComponent* ItemComponent) ;
 
+	float GetTileSize() const {return TileSize;}
 	
+	void AssignHoverItem(UInv_InventoryItem* InventoryItem);
+	
+	void OnHide();
 	
 private:
 	
@@ -57,8 +64,8 @@ private:
 	
 	void ConstructGrid();
 	
-	FInv_SlotAvailabilityResult HasRoomForItem(const UInv_InventoryItem* Item);
-	FInv_SlotAvailabilityResult HasRoomForItem(const FInv_ItemManifest& Manifest);
+	FInv_SlotAvailabilityResult HasRoomForItem(const UInv_InventoryItem* Item , const int32 StackAmountOverride = -1);
+	FInv_SlotAvailabilityResult HasRoomForItem(const FInv_ItemManifest& Manifest , const int32 StackAmountOverride = -1);
 	void AddItemToIndices(const FInv_SlotAvailabilityResult& Result, UInv_InventoryItem* NewItem);
 	FVector2D GetDrawSize(const FInv_GridFragment* GridFragment) const;
 	void SetSlottedItemImage(const UInv_SlottedItem* SlottedItem , const FInv_GridFragment* GridFragment,const FInv_ImageFragment* ImageFragment);
@@ -118,7 +125,7 @@ private:
 	bool IsLeftClicked(const FPointerEvent& MouseEvent) const;
 	bool IsRightClicked(const FPointerEvent& MouseEvent) const;
 	void PickUp(UInv_InventoryItem* ClickedInventoryItem , const int32 GridIndex);
-	void AssignHoverItem(UInv_InventoryItem* InventoryItem);
+
 	void AssignHoverItem(UInv_InventoryItem* InventoryItem , const int32 GridIndex , const int32 PreviousGridIndex);
 	void RemoveItemFromGrid(UInv_InventoryItem* InventoryItem , const int32 GridIndex);
 	
@@ -145,7 +152,7 @@ private:
 	void OnGridSlotUnHovered(int32 GridIndex , const FPointerEvent& MouseEvent);
 	
 	void PutDownOnIndex(const int32 Index);
-	void ClearHoverItem();
+
 	
 	UUserWidget* GetVisibleCursorWidget();
 	UUserWidget* GetHiddenCursorWidget();
@@ -177,6 +184,10 @@ private:
 	UFUNCTION()
 	void OnPopMenuConsume(int32 GridIndex);
 	
+	void PutHoverItemBack();
+	
+	UFUNCTION()
+	void OnInventoryMenuToggled(bool bOpen);
 	
 	UPROPERTY(EditDefaultsOnly , Category = "Inventory")
 	TSubclassOf<UInv_ItemPopUp> ItemPopUpClass;

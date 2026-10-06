@@ -34,6 +34,7 @@ void UInv_InventoryComponent::ToggleInventoryMenu()
 	{
 		OpenInventoryMenu();
 	}
+	OnInventoryMenuToggled.Broadcast(bInventoryMenuOpen);
 }
 
 
@@ -171,6 +172,20 @@ void UInv_InventoryComponent::SpawnDroppedItem(UInv_InventoryItem* Item, int32 S
 	
 	ItemManifest.SpawnPickUpActor(this , SpawnLocation, SpawnRotation);
 	
+}
+
+void UInv_InventoryComponent::Server_EquipSlotItemClicked_Implementation(UInv_InventoryItem* ItemToEquip,
+	UInv_InventoryItem* ItemToUnequip)
+{
+	Multicast_EquipSlotItemClicked(ItemToEquip, ItemToUnequip);
+}
+
+void UInv_InventoryComponent::Multicast_EquipSlotItemClicked_Implementation(UInv_InventoryItem* ItemToEquip,
+	UInv_InventoryItem* ItemToUnequip)
+{
+	//TODO:搞个ItemEquipmentComponent来接收广播
+	OnItemEquipped.Broadcast(ItemToEquip);
+	OnItemUnequipped.Broadcast(ItemToUnequip);
 }
 
 UInv_InventoryBase* UInv_InventoryComponent::GetInventoryMenu() const

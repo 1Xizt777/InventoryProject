@@ -8,6 +8,7 @@
 #include "Inv_InventoryStatics.generated.h"
 
 
+class UInv_InventoryBase;
 class UInv_InventoryComponent;
 class UInv_ItemComponent;
 
@@ -32,6 +33,13 @@ public:
 	
 	UFUNCTION(BlueprintCallable, Category = "Inventory")
 	static void ItemUnhovered(APlayerController* PC);
+	
+	UFUNCTION(BlueprintCallable, Category = "Inventory")
+	static UInv_HoverItem* GetHoverItem(APlayerController* PC);
+	
+	UFUNCTION(BlueprintCallable, Category = "Inventory")
+	static UInv_InventoryBase* GetInvntoryWidget(APlayerController* PC);
+	
 };
 
 

@@ -15,6 +15,8 @@ class UInv_ItemComponent;
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FInventoryItemChanged , UInv_InventoryItem* , Item);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FNoRoomInInventory);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FStackChanged , const FInv_SlotAvailabilityResult&  ,Result);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FItemEquipStatusChanged , UInv_InventoryItem* , Item);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FInventoryMenuToggled , bool , bOpen);
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent),Blueprintable)
 class INVENTORY_API UInv_InventoryComponent : public UActorComponent
@@ -33,6 +35,10 @@ public:
 	FInventoryItemChanged OnItemRemoved;
 	FNoRoomInInventory NoRoomInInventory;
 	FStackChanged OnStackChanged;
+	FItemEquipStatusChanged OnItemEquipped;
+	FItemEquipStatusChanged OnItemUnequipped;
+	FInventoryMenuToggled OnInventoryMenuToggled;
+	
 	
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly , Category = "Inventory")
 	void TryAddItem(UInv_ItemComponent* ItemComponent);
@@ -52,6 +58,12 @@ public:
 	void Server_ConsumeItem(UInv_InventoryItem* Item);
 	
 	void SpawnDroppedItem(UInv_InventoryItem* Item , int32 StackCount);
+	
+	UFUNCTION(Server, Reliable)
+	void Server_EquipSlotItemClicked(UInv_InventoryItem* ItemToEquip , UInv_InventoryItem* ItemToUnequip);
+	
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_EquipSlotItemClicked(UInv_InventoryItem* ItemToEquip , UInv_InventoryItem* ItemToUnequip);
 	
 	UInv_InventoryBase* GetInventoryMenu()const;
 protected:

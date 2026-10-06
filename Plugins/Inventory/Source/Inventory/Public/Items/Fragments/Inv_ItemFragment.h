@@ -217,17 +217,12 @@ private:
 
 
 
-USTRUCT(BlueprintType)
-struct FInv_ConsumeModifier : public FInv_LabelNumebrFragment
-{
-	GENERATED_BODY()
-	
-	virtual void OnConsume(APlayerController* PC) {}
-
-};
 
 
+//Consumable
 
+
+struct FInv_ConsumeModifier;
 USTRUCT(BlueprintType)
 struct FInv_ConsumableFragment : public FInv_InventoryItemFragment
 {
@@ -247,6 +242,14 @@ private:
 };
 
 
+USTRUCT(BlueprintType)
+struct FInv_ConsumeModifier : public FInv_LabelNumebrFragment
+{
+	GENERATED_BODY()
+	
+	virtual void OnConsume(APlayerController* PC) {}
+
+};
 
 
 
@@ -268,3 +271,53 @@ struct FInv_ManaPotionFragment : public FInv_ConsumeModifier
 	
 	virtual void OnConsume(APlayerController* PC) override;
 };
+
+
+
+
+
+
+
+
+//Equipment
+
+
+struct FInv_EquipModifier;
+USTRUCT(BlueprintType)
+struct FInv_EquipmentFragment : public FInv_InventoryItemFragment
+{
+	GENERATED_BODY()
+
+	bool bEquipped{false};
+	
+	void OnEquip(APlayerController* PC);
+	void OnUnEquip(APlayerController* PC);
+	virtual void Assimilate(UInv_CompositeBase* Composite) const override;
+private:
+
+	UPROPERTY(EditDefaultsOnly, Category = "Inventory" , meta =(ExcludeBaseStruct))	
+	TArray<TInstancedStruct<FInv_EquipModifier>> EquipModifiers;
+	
+};
+
+
+USTRUCT(BlueprintType)
+struct FInv_EquipModifier : public FInv_LabelNumebrFragment
+{
+	GENERATED_BODY()
+	
+	virtual void OnEquip(APlayerController* PC){}
+	virtual void OnUnEquip(APlayerController* PC){}
+};
+
+
+
+USTRUCT(BlueprintType)
+struct FInv_StrengthModifier : public FInv_EquipModifier
+{
+	GENERATED_BODY()
+	
+	virtual void OnEquip(APlayerController* PC) override;
+	virtual void OnUnEquip(APlayerController* PC) override;
+};
+
